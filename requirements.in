@@ -3,7 +3,6 @@ anyio
 build
 certifi
 charset-normalizer
-click
 colorama
 exceptiongroup
 h11
