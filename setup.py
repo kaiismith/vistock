@@ -20,11 +20,11 @@ setup(
     license='Apache-2.0',
     keywords='stock, vietnamese, vietnam, financial data, stock market',
     python_requires='>=3.10',
-    url='https://github.com/JustKiet/vinews',
+    url='https://github.com/kaiismith/vistock',
     project_urls={
-        'Bug Reports': 'https://github.com/JustKiet/vinews/issues',
-        'Source': 'https://github.com/JustKiet/vinews',
-        'Documentation': 'https://github.com/JustKiet/vinews#readme',
+        'Bug Reports': 'https://github.com/kaiismith/vistock/issues',
+        'Source': 'https://github.com/kaiismith/vistock',
+        'Documentation': 'https://github.com/kaiismith/vistock#readme',
     },
     classifiers=[
         'Development Status :: 3 - Alpha',
