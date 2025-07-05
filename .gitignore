@@ -202,3 +202,5 @@ DEV_GUIDELINE.md
 *.csv
 
 main.py
+
+*.json
