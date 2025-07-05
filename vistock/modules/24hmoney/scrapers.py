@@ -1,17 +1,17 @@
 from vistock.core.constants import (
-    DEFAULT_VNDIRECT_BASE_URL, DEFAULT_VNDIRECT_DOMAIN, DEFAULT_VNDIRECT_HEADERS,
+    DEFAULT_24HMONEY_BASE_URL, DEFAULT_24HMONEY_DOMAIN, DEFAULT_24HMONEY_HEADERS,
     DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_CONNECT
 )
-from vistock.core.interfaces.ivistockscraper import IVistockVnDirectScraper, AsyncIVistockVnDirectScraper
+from vistock.core.interfaces.ivistockscraper import IVistock24HMoneyScraper, AsyncIVistock24HMoneyScraper
 from vistock.core.utils import VistockValidator
 from typing import Dict, Any
 import tenacity
 import httpx
 
-class VistockVnDirectScraper(IVistockVnDirectScraper, AsyncIVistockVnDirectScraper):
+class Vistock24HMoneyScraper(IVistock24HMoneyScraper, AsyncIVistock24HMoneyScraper):
     def __init__(self, **kwargs: Any) -> None:
-        self._base_url = DEFAULT_VNDIRECT_BASE_URL
-        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._base_url = DEFAULT_24HMONEY_BASE_URL
+        self._domain = DEFAULT_24HMONEY_DOMAIN
 
         timeout = kwargs.get('timeout', DEFAULT_TIMEOUT)
         timeout_connect = kwargs.get('timeout_connect', DEFAULT_TIMEOUT_CONNECT)
@@ -36,7 +36,7 @@ class VistockVnDirectScraper(IVistockVnDirectScraper, AsyncIVistockVnDirectScrap
             connect=timeout_connect
         )
 
-        headers: Dict[str, Any] = kwargs.get('headers', DEFAULT_VNDIRECT_HEADERS)
+        headers: Dict[str, Any] = kwargs.get('headers', DEFAULT_24HMONEY_HEADERS)
 
         self._headers = headers
 
@@ -77,6 +77,5 @@ class VistockVnDirectScraper(IVistockVnDirectScraper, AsyncIVistockVnDirectScrap
 
         return response.json()
     
-
 
 

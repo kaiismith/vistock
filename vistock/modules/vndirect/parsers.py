@@ -1,19 +1,20 @@
-from vistock.core.interfaces.ivistockparser import IViStockParser
+from vistock.core.interfaces.ivistockparser import IViStockVnDirectParser
 from vistock.core.constants import DEFAULT_VNDIRECT_DOMAIN
 from vistock.core.utils import VistockValidator
 from urllib.parse import urlencode
-from typing import Optional
+from datetime import datetime
+from typing import Dict, Any
 
-class VistockVnDirectParser(IViStockParser):
+class VistockVnDirectParser(IViStockVnDirectParser):
     def __init__(self):
         self._domain = DEFAULT_VNDIRECT_DOMAIN
 
-    def _parse_url_path(
+    def parse_url_path(
         self,
         code: str,
-        start_date: str,
-        end_date: str,
-        limit: Optional[int] = 1
+        start_date: str = '2012-01-01',
+        end_date: str = datetime.now().strftime('%Y-%m-%d'),
+        limit: int = 1
     ) -> str:
         if limit < 0:
             raise ValueError(
@@ -38,7 +39,7 @@ class VistockVnDirectParser(IViStockParser):
 
         q_param = '~'.join(query_parts)
 
-        query_params = {
+        query_params : Dict[str, Any] = {
             'sort': 'date',
             'q': q_param,
             'size': limit,

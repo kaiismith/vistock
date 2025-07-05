@@ -57,17 +57,18 @@ class VistockValidator:
         return resolution in valid_resolutions if resolution else True
     
     @staticmethod
-    def validate_json_data(data: List[Dict[str, Any]]) -> bool:
-        if not isinstance(data, list):
-            return False
-        
-        for entry in data:
-            if not isinstance(entry, dict):
-                return False
-            
+    def validate_json_data(data: List[Dict[str, Any]]) -> bool:        
+        for entry in data:            
             missing_fields = VistockValidator.REQUIRED_FIELDS - entry.keys()
             if missing_fields:
                 return False
             
         return True
+    
+    @staticmethod
+    def validate_code(code: str) -> bool:        
+        if len(code) == 3:
+            return True
+        
+        return False
         

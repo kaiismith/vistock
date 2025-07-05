@@ -1,7 +1,8 @@
-from typing import Protocol, Literal
+from vistock.core.models import StandardVnDirectStockIndex, AdvancedVnDirectStockIndex
+from typing import List, Union, Protocol, Literal
 from datetime import datetime
 
-class IVistockSearch(Protocol):
+class IVistockVnDirectSearch(Protocol):
     def search(
         self, 
         code: str,
@@ -10,10 +11,10 @@ class IVistockSearch(Protocol):
         resolution: Literal['day', 'week', 'month', 'year'] = 'day',
         advanced: bool = True,
         ascending: bool = False
-    ):
+    ) -> Union[List[StandardVnDirectStockIndex], List[AdvancedVnDirectStockIndex]]:
         ...
 
-class AsyncIVistockSearch(Protocol):
+class AsyncIVistockVnDirectSearch(Protocol):
     async def search(
         self, 
         code: str,
@@ -22,5 +23,5 @@ class AsyncIVistockSearch(Protocol):
         resolution: Literal['day', 'week', 'month', 'year'] = 'day',
         advanced: bool = True,
         ascending: bool = False
-    ):
+    ) -> Union[List[StandardVnDirectStockIndex], List[AdvancedVnDirectStockIndex]]:
         ...
