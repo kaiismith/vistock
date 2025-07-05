@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 from datetime import datetime
 
 class VistockValidator:
-    REQUIRED_FIELDS = {
+    STOCK_INDEX_REQUIRED_FIELDS = {
         'code', 'date', 'time', 'floor', 'type', 'basicPrice', 'ceilingPrice',
         'floorPrice', 'open', 'high', 'low', 'close', 'average', 'adOpen',
         'adHigh', 'adLow', 'adClose', 'adAverage', 'nmVolume', 'nmValue',
@@ -57,9 +57,9 @@ class VistockValidator:
         return resolution in valid_resolutions if resolution else True
     
     @staticmethod
-    def validate_json_data(data: List[Dict[str, Any]]) -> bool:        
+    def validate_stock_index_json_data(data: List[Dict[str, Any]]) -> bool:        
         for entry in data:            
-            missing_fields = VistockValidator.REQUIRED_FIELDS - entry.keys()
+            missing_fields = VistockValidator.STOCK_INDEX_REQUIRED_FIELDS - entry.keys()
             if missing_fields:
                 return False
             

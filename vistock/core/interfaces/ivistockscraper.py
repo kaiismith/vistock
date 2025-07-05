@@ -1,15 +1,25 @@
-class IVistockVnDirectScraper:
-    def fetch(self, url: str):
+from typing import Dict, Any
+
+class IVistockVnDirectStockIndexScraper:
+    def fetch(self, url: str) -> Dict[str, Any]:
         ...
 
-class AsyncIVistockVnDirectScraper:
-    async def async_fetch(self, url: str):
+class AsyncIVistockVnDirectStockIndexScraper:
+    async def async_fetch(self, url: str) -> Dict[str, Any]:
         ...
 
 class IVistock24HMoneyScraper:
-    def fetch(self, url: str):
+    def fetch(self, url: str) -> Dict[str, Any]:
         ...
 
 class AsyncIVistock24HMoneyScraper:
-    async def async_fetch(self, url: str):
+    async def async_fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
+class IVistockVnDirectFundamentalIndexScraper:
+    def fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
+class AsyncIVistockVnDirectFundamentalIndexScraper:
+    async def async_fetch(self, url: str) -> Dict[str, Any]:
         ...

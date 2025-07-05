@@ -1,8 +1,12 @@
-from vistock.core.models import StandardVnDirectStockIndex, AdvancedVnDirectStockIndex
-from typing import List, Union, Protocol, Literal
+from vistock.core.models import (
+    StandardVnDirectStockIndexSearchResults, 
+    AdvancedVnDirectStockIndexSearchResults,
+    StandardVnDirectFundamentalIndexSearchResults
+)
+from typing import Union, Protocol, Literal
 from datetime import datetime
 
-class IVistockVnDirectSearch(Protocol):
+class IVistockVnDirectStockIndexSearch(Protocol):
     def search(
         self, 
         code: str,
@@ -11,11 +15,11 @@ class IVistockVnDirectSearch(Protocol):
         resolution: Literal['day', 'week', 'month', 'year'] = 'day',
         advanced: bool = True,
         ascending: bool = False
-    ) -> Union[List[StandardVnDirectStockIndex], List[AdvancedVnDirectStockIndex]]:
+    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
         ...
 
-class AsyncIVistockVnDirectSearch(Protocol):
-    async def search(
+class AsyncIVistockVnDirectStockIndexSearch(Protocol):
+    async def async_search(
         self, 
         code: str,
         start_date: str = '2012-01-01',
@@ -23,5 +27,19 @@ class AsyncIVistockVnDirectSearch(Protocol):
         resolution: Literal['day', 'week', 'month', 'year'] = 'day',
         advanced: bool = True,
         ascending: bool = False
-    ) -> Union[List[StandardVnDirectStockIndex], List[AdvancedVnDirectStockIndex]]:
+    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
+        ...
+
+class IVistockVnDirectFundamentalIndexSearch(Protocol):
+    def search(
+        self,
+        code: str
+    ) -> StandardVnDirectFundamentalIndexSearchResults:
+        ...
+
+class AsyncIVistockVnDirectFundamentalIndexSearch(Protocol):
+    async def async_search(
+        self,
+        code: str
+    ) -> StandardVnDirectFundamentalIndexSearchResults:
         ...

@@ -1,7 +1,7 @@
+from typing import List, Protocol
 from datetime import datetime
-from typing import Protocol
 
-class IViStockVnDirectParser(Protocol):
+class IViStockVnDirectStockIndexParser(Protocol):
     def parse_url_path(
         self,
         code: str,
@@ -11,7 +11,7 @@ class IViStockVnDirectParser(Protocol):
     ) -> str:
         ...
 
-class IVistock24HMoneyParser(Protocol):
+class IVistock24HMoneyStockIndexParser(Protocol):
     def parse_url_path(
         self,
         industry_code: str = 'all',
@@ -20,5 +20,12 @@ class IVistock24HMoneyParser(Protocol):
         letter: str = 'all',
         limit: int = 2000
     ) -> str:
+        ...
+
+class IVistockVnDirectFundamentalIndexParser(Protocol):
+    def parse_url_path(
+        self,
+        code: str
+    ) -> List[str]:
         ...
     

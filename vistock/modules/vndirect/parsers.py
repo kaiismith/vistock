@@ -1,11 +1,14 @@
-from vistock.core.interfaces.ivistockparser import IViStockVnDirectParser
+from vistock.core.interfaces.ivistockparser import (
+    IViStockVnDirectStockIndexParser,
+    IVistockVnDirectFundamentalIndexParser
+)
 from vistock.core.constants import DEFAULT_VNDIRECT_DOMAIN
 from vistock.core.utils import VistockValidator
 from urllib.parse import urlencode
 from datetime import datetime
-from typing import Dict, Any
+from typing import List, Dict, Any
 
-class VistockVnDirectParser(IViStockVnDirectParser):
+class VistockVnDirectStockIndexParser(IViStockVnDirectStockIndexParser):
     def __init__(self):
         self._domain = DEFAULT_VNDIRECT_DOMAIN
 
@@ -16,6 +19,11 @@ class VistockVnDirectParser(IViStockVnDirectParser):
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
         limit: int = 1
     ) -> str:
+        if not VistockValidator.validate_code(code):
+            raise ValueError(
+                'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
+            )
+
         if limit < 0:
             raise ValueError(
                 'Invalid limit: "limit" must be a positive integer greater than zero to ensure proper pagination and data retrieval.'
@@ -47,4 +55,20 @@ class VistockVnDirectParser(IViStockVnDirectParser):
         }
 
         return f'?{urlencode(query_params)}'
+    
+class VistockVnDirectFundamentalIndexParser(IVistockVnDirectFundamentalIndexParser):
+    def __init__(self):
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._url_templates = [
+            "?filter=ratioCode:MARKETCAP,NMVOLUME_AVG_CR_10D,PRICE_HIGHEST_CR_52W,PRICE_LOWEST_CR_52W,OUTSTANDING_SHARES,FREEFLOAT,BETA,PRICE_TO_EARNINGS,PRICE_TO_BOOK,DIVIDEND_YIELD,BVPS_CR,&where=code:{code}&order=reportDate&fields=ratioCode,value",
+            "?filter=ratioCode:ROAE_TR_AVG5Q,ROAA_TR_AVG5Q,EPS_TR,&where=code:{code}&order=reportDate&fields=ratioCode,value"
+        ]
+
+    def parse_url_path(self, code: str) -> List[str]:
+        if not VistockValidator.validate_code(code):
+            raise ValueError(
+                'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
+            )
+        
+        return [template.format(code=code) for template in self._url_templates]
     
