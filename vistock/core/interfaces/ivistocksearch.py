@@ -1,7 +1,14 @@
 from vistock.core.models import (
     StandardVnDirectStockIndexSearchResults, 
     AdvancedVnDirectStockIndexSearchResults,
-    StandardVnDirectFundamentalIndexSearchResults
+    StandardVnDirectFundamentalIndexSearchResults,
+    Standard24HMoneyStockSectionSearchResults
+)
+from vistock.core.enums import (
+    Vistock24HMoneyIndustryCategory,
+    Vistock24HMoneyFloorCategory,
+    Vistock24HMoneyCompanyCategory,
+    Vistock24HMoneyLetterCategory
 )
 from typing import Union, Protocol, Literal
 from datetime import datetime
@@ -42,4 +49,26 @@ class AsyncIVistockVnDirectFundamentalIndexSearch(Protocol):
         self,
         code: str
     ) -> StandardVnDirectFundamentalIndexSearchResults:
+        ...
+
+class IVistock24HMoneyStockSectionSearch(Protocol):
+    def search(
+        self,
+        industry: Union[Vistock24HMoneyIndustryCategory, str] = 'all',
+        floor: Union[Vistock24HMoneyFloorCategory, str] = 'all',
+        company_type: Union[Vistock24HMoneyCompanyCategory, str] = 'all',
+        letter: Union[Vistock24HMoneyLetterCategory, str] = 'all',
+        limit: int = 2000
+    ) -> Standard24HMoneyStockSectionSearchResults:
+        ...
+
+class AsyncIVistock24HMoneyStockSectionSearch(Protocol):
+    async def async_search(
+        self,
+        industry: Union[Vistock24HMoneyIndustryCategory, str] = 'all',
+        floor: Union[Vistock24HMoneyFloorCategory, str] = 'all',
+        company_type: Union[Vistock24HMoneyCompanyCategory, str] = 'all',
+        letter: Union[Vistock24HMoneyLetterCategory, str] = 'all',
+        limit: int = 2000 
+    ) -> Standard24HMoneyStockSectionSearchResults:
         ...

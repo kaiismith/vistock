@@ -1,6 +1,8 @@
-from typing import List, Dict, Any
+from vistock.core.enums import Vistock24HMoneySectionMapping
+from typing import List, Dict, Union, Any, Type
 from urllib.parse import urlparse
 from datetime import datetime
+from enum import Enum
 
 class VistockValidator:
     STOCK_INDEX_REQUIRED_FIELDS = {
@@ -71,4 +73,42 @@ class VistockValidator:
             return True
         
         return False
+    
+    @staticmethod
+    def validate_enum_value(value: Union[str, Enum], enum_cls: Type[Enum]) -> bool:
+        print(value, enum_cls)
+        if isinstance(value, enum_cls):
+            return True
+
+        if isinstance(value, str):
+            if value.upper() in enum_cls.__members__:
+                return True
+            if any(member.value == value for member in enum_cls):
+                return True
+
+        return False
+
+class VistockNormalizator:
+    @staticmethod
+    def normalize_enum_value(value: Union[str, Enum], enum_cls: Type[Enum]) -> str:
+        if isinstance(value, enum_cls):
+            return value.value
+
+        if isinstance(value, str):
+            if value.upper() in enum_cls.__members__:
+                return enum_cls[value.upper()].value
+            for member in enum_cls:
+                if member.value == value:
+                    return value
+
+        raise ValueError(f"Cannot normalize value '{value}' for enum {enum_cls.__name__}")
+
+class VistockMapper:
+    @staticmethod
+    def map_english_section(vn_section: str) -> str:
+        for section in Vistock24HMoneySectionMapping:
+            if section.value == vn_section:
+                return section.name.replace('_', ' ').title()
+            
+        raise ValueError(f'No English mapping found for: {vn_section}')
         

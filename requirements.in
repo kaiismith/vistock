@@ -3,6 +3,7 @@ anyio
 build
 certifi
 charset-normalizer
+click
 colorama
 exceptiongroup
 h11
@@ -12,12 +13,14 @@ idna
 numpy
 packaging
 pandas
+pip-tools
 pydantic
 pydantic_core
 pyproject_hooks
 python-dateutil
 pytz
 requests
+setuptools
 six
 sniffio
 tenacity
@@ -26,3 +29,4 @@ typing-inspection
 typing_extensions
 tzdata
 urllib3
+wheel

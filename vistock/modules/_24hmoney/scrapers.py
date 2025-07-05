@@ -2,13 +2,16 @@ from vistock.core.constants import (
     DEFAULT_24HMONEY_BASE_URL, DEFAULT_24HMONEY_DOMAIN, DEFAULT_24HMONEY_HEADERS,
     DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_CONNECT
 )
-from vistock.core.interfaces.ivistockscraper import IVistock24HMoneyScraper, AsyncIVistock24HMoneyScraper
+from vistock.core.interfaces.ivistockscraper import (
+    IVistock24HMoneyStockSectionScraper,
+    AsyncIVistock24HMoneyStockSectionScraper
+)
 from vistock.core.utils import VistockValidator
 from typing import Dict, Any
 import tenacity
 import httpx
 
-class Vistock24HMoneyScraper(IVistock24HMoneyScraper, AsyncIVistock24HMoneyScraper):
+class Vistock24HMoneyStockSectionScraper(IVistock24HMoneyStockSectionScraper, AsyncIVistock24HMoneyStockSectionScraper):
     def __init__(self, **kwargs: Any) -> None:
         self._base_url = DEFAULT_24HMONEY_BASE_URL
         self._domain = DEFAULT_24HMONEY_DOMAIN

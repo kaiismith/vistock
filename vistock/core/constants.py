@@ -9,7 +9,7 @@ DEFAULT_VNDIRECT_HEADERS = {
 }
 
 DEFAULT_24HMONEY_DOMAIN = '24hmoney.vn'
-DEFAULT_24HMONEY_BASE_URL = 'https://api-finance-t19.24hmoney.vn/v1/ios/company/az?device_id=web1751294a5n3fwa3u3n2pr0x6etfv4ohb2h2wrsv559082&device_name=INVALID&device_model=Windows+11&network_carrier=INVALID&connection_type=INVALID&os=Chrome&os_version=137.0.0.0&access_token=INVALID&push_token=INVALID&locale=vi&browser_id=web1751294a5n3fwa3u3n2pr0x6etfv4ohb2h2wrsv559082&industry_code=all&floor_code=all&com_type=all&letter=all&page=1&per_page=2000'
+DEFAULT_24HMONEY_BASE_URL = 'https://api-finance-t19.24hmoney.vn/v1/ios/company/az'
 DEFAULT_24HMONEY_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
     'Accept': 'application/json, text/plain, */*',

@@ -116,7 +116,7 @@ class VistockVnDirectStockIndexSearch:
                     'Invalid resolution: "resolution" must be one of the following values: "day", "week", "month", or "year". Please ensure that the resolution is specified correctly.'
                 )
 
-            initial_url = f"{self._base_url}{self._parser.parse_url_path(code=code, start_date=start_date, end_date=end_date)}"
+            initial_url = f'{self._base_url}{self._parser.parse_url_path(code=code, start_date=start_date, end_date=end_date)}'
             total_elements = self._scraper.fetch(url=initial_url).get('totalElements', 0)
 
             url = f"{self._base_url}{self._parser.parse_url_path(code=code, start_date=start_date, end_date=end_date, limit=total_elements)}"
@@ -132,7 +132,7 @@ class VistockVnDirectStockIndexSearch:
                     'Invalid data format: The fetched data does not conform to the expected JSON structure. Please ensure that the API response is valid and contains the necessary fields.'
                 )
             
-            data.sort(key=lambda x: x.get("date", ""), reverse=not ascending)
+            data.sort(key=lambda x: x.get('date', ''), reverse=not ascending)
 
             if advanced:
                 return AdvancedVnDirectStockIndexSearchResults(
@@ -161,7 +161,7 @@ class VistockVnDirectStockIndexSearch:
             ) 
 
         except Exception:
-            logger.error("An unexpected error occurred during the search operation.", exc_info=True)
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
     @overload
@@ -221,11 +221,11 @@ class VistockVnDirectStockIndexSearch:
                     'Invalid resolution: "resolution" must be one of the following values: "day", "week", "month", or "year". Please ensure that the resolution is specified correctly.'
                 )
 
-            initial_url = f"{self._base_url}{self._parser.parse_url_path(code=code, start_date=start_date, end_date=end_date)}"
+            initial_url = f'{self._base_url}{self._parser.parse_url_path(code=code, start_date=start_date, end_date=end_date)}'
             initial_response = await self._scraper.async_fetch(url=initial_url)
             total_elements = initial_response.get('totalElements', 0)
 
-            url = f"{self._base_url}{self._parser.parse_url_path(code=code, start_date=start_date, end_date=end_date, limit=total_elements)}"
+            url = f'{self._base_url}{self._parser.parse_url_path(code=code, start_date=start_date, end_date=end_date, limit=total_elements)}'
             response = await self._scraper.async_fetch(url=url) 
             data: List[Dict[str, Any]] = response.get('data', [])
 
@@ -239,7 +239,7 @@ class VistockVnDirectStockIndexSearch:
                     'Invalid data format: The fetched data does not conform to the expected JSON structure. Please ensure that the API response is valid and contains the necessary fields.'
                 )
 
-            data.sort(key=lambda x: x.get("date", ""), reverse=not ascending)
+            data.sort(key=lambda x: x.get('date', ''), reverse=not ascending)
 
             if advanced:
                 return AdvancedVnDirectStockIndexSearchResults(
@@ -268,7 +268,7 @@ class VistockVnDirectStockIndexSearch:
             )
 
         except Exception:
-            logger.error("An unexpected error occurred during the search operation.", exc_info=True)
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
 class VistockVnDirectFundamentalSearch:
@@ -314,7 +314,7 @@ class VistockVnDirectFundamentalSearch:
             
             urls = self._parser.parse_url_path(code=code)
             for url in urls:
-                url = f"{self._base_url}{url}"
+                url = f'{self._base_url}{url}'
                 data: List[Dict[str, Any]] = self._scraper.fetch(url).get('data', [])
 
                 if not data:
@@ -327,32 +327,32 @@ class VistockVnDirectFundamentalSearch:
             merged_results = [item for result in results for item in result]
 
             field_map = {
-                "MARKETCAP": "marketcap",
-                "NMVOLUME_AVG_CR_10D": "nm_volume_avg_cr_10d",
-                "PRICE_HIGHEST_CR_52W": "price_highest_cr_52w",
-                "PRICE_LOWEST_CR_52W": "price_lowest_cr_52w",
-                "OUTSTANDING_SHARES": "outstanding_shares",
-                "FREEFLOAT": "freefloat",
-                "BETA": "beta",
-                "PRICE_TO_EARNINGS": "price_to_earnings",
-                "PRICE_TO_BOOK": "price_to_book",
-                "ROAE_TR_AVG5Q": "roae_tr_avg_5q",
-                "ROAA_TR_AVG5Q": "roaa_tr_avg_5q",
-                "DIVIDEND_YIELD": "dividend_yield",
-                "EPS_TR": "eps_tr",
-                "BVPS_CR": "bvps_cr"
+                'MARKETCAP': 'marketcap',
+                'NMVOLUME_AVG_CR_10D': 'nm_volume_avg_cr_10d',
+                'PRICE_HIGHEST_CR_52W': 'price_highest_cr_52w',
+                'PRICE_LOWEST_CR_52W': 'price_lowest_cr_52w',
+                'OUTSTANDING_SHARES': 'outstanding_shares',
+                'FREEFLOAT': 'freefloat',
+                'BETA': 'beta',
+                'PRICE_TO_EARNINGS': 'price_to_earnings',
+                'PRICE_TO_BOOK': 'price_to_book',
+                'ROAE_TR_AVG5Q': 'roae_tr_avg_5q',
+                'ROAA_TR_AVG5Q': 'roaa_tr_avg_5q',
+                'DIVIDEND_YIELD': 'dividend_yield',
+                'EPS_TR': 'eps_tr',
+                'BVPS_CR': 'bvps_cr'
             }
 
             model_data: Dict[str, float] = {}
             for item in merged_results:
-                key = field_map.get(item["ratioCode"])
+                key = field_map.get(item['ratioCode'])
                 if key:
-                    model_data[key] = item["value"]
+                    model_data[key] = item['value']
 
             return StandardVnDirectFundamentalIndexSearchResults(**model_data)
         
         except Exception:
-            logger.error("An unexpected error occurred during the search operation.", exc_info=True)
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
     async def async_search(self, code: str) -> StandardVnDirectFundamentalIndexSearchResults:
@@ -366,7 +366,7 @@ class VistockVnDirectFundamentalSearch:
             
             urls = self._parser.parse_url_path(code=code)
             for url in urls:
-                url = f"{self._base_url}{url}"
+                url = f'{self._base_url}{url}'
                 response = await self._scraper.async_fetch(url)
                 data: List[Dict[str, Any]] = response.get('data', [])
 
@@ -380,30 +380,30 @@ class VistockVnDirectFundamentalSearch:
             merged_results = [item for result in results for item in result]
 
             field_map = {
-                "MARKETCAP": "marketcap",
-                "NMVOLUME_AVG_CR_10D": "nm_volume_avg_cr_10d",
-                "PRICE_HIGHEST_CR_52W": "price_highest_cr_52w",
-                "PRICE_LOWEST_CR_52W": "price_lowest_cr_52w",
-                "OUTSTANDING_SHARES": "outstanding_shares",
-                "FREEFLOAT": "freefloat",
-                "BETA": "beta",
-                "PRICE_TO_EARNINGS": "price_to_earnings",
-                "PRICE_TO_BOOK": "price_to_book",
-                "ROAE_TR_AVG5Q": "roae_tr_avg_5q",
-                "ROAA_TR_AVG5Q": "roaa_tr_avg_5q",
-                "DIVIDEND_YIELD": "dividend_yield",
-                "EPS_TR": "eps_tr",
-                "BVPS_CR": "bvps_cr"
+                'MARKETCAP': 'marketcap',
+                'NMVOLUME_AVG_CR_10D': 'nm_volume_avg_cr_10d',
+                'PRICE_HIGHEST_CR_52W': 'price_highest_cr_52w',
+                'PRICE_LOWEST_CR_52W': 'price_lowest_cr_52w',
+                'OUTSTANDING_SHARES': 'outstanding_shares',
+                'FREEFLOAT': 'freefloat',
+                'BETA': 'beta',
+                'PRICE_TO_EARNINGS': 'price_to_earnings',
+                'PRICE_TO_BOOK': 'price_to_book',
+                'ROAE_TR_AVG5Q': 'roae_tr_avg_5q',
+                'ROAA_TR_AVG5Q': 'roaa_tr_avg_5q',
+                'DIVIDEND_YIELD': 'dividend_yield',
+                'EPS_TR': 'eps_tr',
+                'BVPS_CR': 'bvps_cr'
             }
 
             model_data: Dict[str, float] = {}
             for item in merged_results:
-                key = field_map.get(item["ratioCode"])
+                key = field_map.get(item['ratioCode'])
                 if key:
-                    model_data[key] = item["value"]
+                    model_data[key] = item['value']
 
             return StandardVnDirectFundamentalIndexSearchResults(**model_data)
         
         except Exception:
-            logger.error("An unexpected error occurred during the search operation.", exc_info=True)
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise

@@ -8,7 +8,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='vistock',
-    version='0.1.0-beta.1',
+    version='0.1.0-beta.2',
     install_requires=requirements,
     include_package_data=True,
     packages=find_packages(exclude=['tests', 'tests.*']),
@@ -19,7 +19,7 @@ setup(
     long_description_content_type='text/markdown',
     license='Apache-2.0',
     keywords='stock, vietnamese, vietnam, financial data, stock market',
-    python_requires='>=3.10',
+    python_requires='>=3.12',
     url='https://github.com/kaiismith/vistock',
     project_urls={
         'Bug Reports': 'https://github.com/kaiismith/vistock/issues',
@@ -30,9 +30,10 @@ setup(
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 3.10',
-        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
+        'Programming Language :: Python :: 3.15'
         'Topic :: Software Development :: Libraries',
         'Topic :: Office/Business :: Financial',
     ],
