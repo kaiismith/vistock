@@ -8,7 +8,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='vistock',
-    version='0.1.0-beta.2',
+    version='0.1.0-beta.3',
     install_requires=requirements,
     include_package_data=True,
     packages=find_packages(exclude=['tests', 'tests.*']),
@@ -33,7 +33,7 @@ setup(
         'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.13',
         'Programming Language :: Python :: 3.14',
-        'Programming Language :: Python :: 3.15'
+        'Programming Language :: Python :: 3.15',
         'Topic :: Software Development :: Libraries',
         'Topic :: Office/Business :: Financial',
     ],
