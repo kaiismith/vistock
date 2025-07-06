@@ -85,17 +85,36 @@ class VistockVnDirectFinancialModelsParser(IVistockVnDirectFinancialModelsParser
         code: str, 
         model_type_code: str, 
         limit: int = 2000
-    ) -> str:
+    ) -> List[str]:
         if not VistockValidator.validate_code(code=code):
             raise ValueError(
                 'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
             )
         
-        return self._url_template.format(
-            code=code,
-            model_type_code=model_type_code,
-            limit=limit
-        )
+        urls: List[str] = []
+
+        if model_type_code == 'all':
+            for category in VistockVnDirectFinancialModelsCategory:
+                if category.value == 'all':
+                    continue
+
+                url = self._url_template.format(
+                    code=code,
+                    model_type_code=category.value,
+                    limit=limit
+                )
+                urls.append(f'{url}')
+
+            return urls
+        else:
+            url = self._url_template.format(
+                code=code,
+                model_type_code=model_type_code,
+                limit=limit
+            )
+            urls.append(f'{url}')
+
+            return urls
     
 class VistockVnDirectFinancialStatementsIndexParser(IVistockVnDirectFinancialStatementsIndexParser):
     def __init__(self):
@@ -125,6 +144,9 @@ class VistockVnDirectFinancialStatementsIndexParser(IVistockVnDirectFinancialSta
 
         if model_type_code == 'all':
             for category in VistockVnDirectFinancialModelsCategory:
+                if category.value == 'all':
+                    continue
+
                 url = self._url_template.format(
                     code=code,
                     report_type_code=report_type_code,

@@ -427,13 +427,21 @@ class VistockVnDirectFinancialModelsSearch:
             else:
                 model_type_code = 'all'
 
-            url = f'{self._base_url}{self._parser.parse_url_path(code=code, model_type_code=model_type_code)}'
-            data: List[Dict[str, Any]] = self._scraper.fetch(url=url).get('data', [])
+            results: List[List[Dict[str, Any]]] = []
 
-            if not data:
-                raise ValueError(
-                    'No data found for the given parameters. Please check the code, and model type to ensure they are correct.'
-                )
+            urls = self._parser.parse_url_path(code=code, model_type_code=model_type_code)
+            for url in urls:
+                url = f'{self._base_url}{url}'
+                data: List[Dict[str, Any]] = self._scraper.fetch(url=url).get('data', [])
+
+                if not data:
+                    raise ValueError(
+                        'No data found for the given parameters. Please check the code, and model type to ensure they are correct.'
+                    )
+                
+                results.append(data)
+
+            merged_results = [item for result in results for item in result]
 
             return StandardVnDirectFinancialModelSearchResults(
                 results=[
@@ -444,16 +452,15 @@ class VistockVnDirectFinancialModelsSearch:
                         model_en_desc=item['modelEnDesc'],
                         company_form=item['companyForm'],
                         note=item['note'],
-                        code_list=[code.strip() for code in item['codeList'].split(',')],
                         item_code=item['itemCode'],
                         item_vn_name=item['itemVnName'],
                         item_en_name=item['itemEnName'],
                         display_order=item['displayOrder'],
                         display_level=item['displayLevel'],
                         form_type=item['formType']
-                    ) for item in data
+                    ) for item in merged_results
                 ],
-                total_results=len(data)
+                total_results=len(merged_results)
             )
 
         except Exception:
@@ -493,34 +500,41 @@ class AsyncVistockVnDirectFinancialModelsSearch:
             else:
                 model_type_code = 'all'
 
-            url = f'{self._base_url}{self._parser.parse_url_path(code=code, model_type_code=model_type_code)}'
-            response = await self._scraper.async_fetch(url=url)
-            data: List[Dict[str, Any]] = response.get('data', [])
+            results: List[List[Dict[str, Any]]] = []
 
-            if not data:
-                raise ValueError(
-                    'No data found for the given parameters. Please check the code, and model type to ensure they are correct.'
-                )
+            urls = self._parser.parse_url_path(code=code, model_type_code=model_type_code)
+            for url in urls:
+                url = f'{self._base_url}{url}'
+                response = await self._scraper.async_fetch(url=url)
+                data: List[Dict[str, Any]] = response.get('data', [])
+
+                if not data:
+                    raise ValueError(
+                        'No data found for the given parameters. Please check the code, and model type to ensure they are correct.'
+                    )
+                
+                results.append(data)
+
+            merged_results = [item for result in results for item in result]
 
             return StandardVnDirectFinancialModelSearchResults(
                 results=[
                     StandardVnDirectFinancialModel(
-                        model_type=int(item['modelType']),
+                        model_type=item['modelType'],
                         model_type_name=item['modelTypeName'],
                         model_vn_desc=item['modelVnDesc'],
                         model_en_desc=item['modelEnDesc'],
                         company_form=item['companyForm'],
                         note=item['note'],
-                        code_list=[code.strip() for code in item['codeList'].split(',')],
-                        item_code=int(item['itemCode']),
+                        item_code=item['itemCode'],
                         item_vn_name=item['itemVnName'],
                         item_en_name=item['itemEnName'],
-                        display_order=int(item['displayOrder']),
-                        display_level=int(item['displayLevel']),
+                        display_order=item['displayOrder'],
+                        display_level=item['displayLevel'],
                         form_type=item['formType']
-                    ) for item in data
+                    ) for item in merged_results
                 ],
-                total_results=len(data)
+                total_results=len(merged_results)
             )
 
         except Exception:
@@ -644,6 +658,7 @@ class AsyncVistockVnDirectFinancialStatementsIndexSearch:
         self._domain = DEFAULT_VNDIRECT_DOMAIN
         self._scraper = VistockVnDirectFinancialStatementsIndexScraper()
         self._parser = VistockVnDirectFinancialStatementsIndexParser()
+        self._finanical_models_search = AsyncVistockVnDirectFinancialModelsSearch()
         self._semaphore = asyncio.Semaphore(self._semaphore_limit)
 
     async def async_search(
@@ -654,6 +669,75 @@ class AsyncVistockVnDirectFinancialStatementsIndexSearch:
         report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
         model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
     ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
-        ...   
+        try:
+            financial_models = await self._finanical_models_search.async_search(
+                code=code,
+                model_type=model_type
+            )
+
+            if report_type != 'ANNUAL':
+                if not VistockValidator.validate_enum_value(report_type, VistockVnDirectReportTypeCategory):
+                    raise ValueError(f'"{report_type}" is not a recognized report type. Use a valid enum name or code.')
+                report_type_code = VistockNormalizator.normalize_enum_value(report_type, VistockVnDirectReportTypeCategory)
+            else:
+                report_type_code = 'all'
+
+            if model_type != 'all':
+                if not VistockValidator.validate_enum_value(model_type, VistockVnDirectFinancialModelsCategory):
+                    raise ValueError(f'"{model_type}" is not a recognized model type. Use a valid enum name or code.')
+                model_type_code = VistockNormalizator.normalize_enum_value(model_type, VistockVnDirectFinancialModelsCategory)
+            else:
+                model_type_code = 'all'     
+
+            results: List[StandardVnDirectFinancialStatementsIndex] = []
+
+            urls = self._parser.parse_url_path(
+                code=code,
+                start_year=start_year,
+                end_year=end_year,
+                report_type_code=report_type_code,
+                model_type_code=model_type_code
+            )
+
+            model_lookup: Dict[Tuple[int, int], StandardVnDirectFinancialModel] = {
+                (model.model_type, model.item_code): model
+                for model in financial_models.results
+            }
+
+            for url in urls:
+                url = f'{self._base_url}{url}'
+                response = await self._scraper.async_fetch(url)
+                data: List[Dict[str, Any]] = response.get('data', [])
+
+                if not data:
+                    raise ValueError(
+                    'No data found for the given parameters. Please check the code, start year, end year, report type, and model type to ensure they are correct and that data exists for the specified range.'
+                )
+
+                for item in data:
+                    model_key = (item['modelType'], item['itemCode'])
+                    model = model_lookup.get(model_key)
+                    if model is None:
+                        continue
+
+                    index = StandardVnDirectFinancialStatementsIndex(
+                        code=item['code'],
+                        model=model,
+                        report_type=item['reportType'],
+                        numeric_value=item['numericValue'],
+                        fiscal_date=item['fiscalDate'],
+                        created_date=item['createdDate'],
+                        modified_date=item['modifiedDate']
+                    )
+                    results.append(index)
+
+            return StandardVnDirectFinancialStatementsIndexSearchResults(
+                results=results,
+                total_results=len(results)
+            )
+        
+        except Exception:
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
+            raise
 
 

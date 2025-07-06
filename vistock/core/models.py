@@ -80,7 +80,6 @@ class StandardVnDirectFinancialModel(BaseModel):
     model_en_desc: str
     company_form: str
     note: str
-    code_list: List[str]
     item_code: int
     item_vn_name: str
     item_en_name: str

@@ -30,7 +30,7 @@ class IVistockVnDirectFinancialModelsParser(Protocol):
         code: str,
         model_type_code: str,
         limit: int = 2000
-    ) -> str:
+    ) -> List[str]:
         ...
 
 class IVistockVnDirectFinancialStatementsIndexParser(Protocol):
