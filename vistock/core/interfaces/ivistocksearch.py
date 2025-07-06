@@ -2,13 +2,17 @@ from vistock.core.models import (
     StandardVnDirectStockIndexSearchResults, 
     AdvancedVnDirectStockIndexSearchResults,
     StandardVnDirectFundamentalIndexSearchResults,
-    Standard24HMoneyStockSectionSearchResults
+    Standard24HMoneyStockSectionSearchResults,
+    StandardVnDirectFinancialModelSearchResults,
+    StandardVnDirectFinancialStatementsIndexSearchResults
 )
 from vistock.core.enums import (
     Vistock24HMoneyIndustryCategory,
     Vistock24HMoneyFloorCategory,
     Vistock24HMoneyCompanyCategory,
-    Vistock24HMoneyLetterCategory
+    Vistock24HMoneyLetterCategory,
+    VistockVnDirectFinancialModelsCategory,
+    VistockVnDirectReportTypeCategory
 )
 from typing import Union, Protocol, Literal
 from datetime import datetime
@@ -49,6 +53,44 @@ class AsyncIVistockVnDirectFundamentalIndexSearch(Protocol):
         self,
         code: str
     ) -> StandardVnDirectFundamentalIndexSearchResults:
+        ...
+
+class IVistockVnDirectFinancialModelsSearch(Protocol):
+    def search(
+        self,
+        code: str,
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialModelSearchResults:
+        ...
+
+class AsyncIVistockVnDirectFinancialModelsSearch(Protocol):
+    async def async_search(
+        self,
+        code: str,
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialModelSearchResults:
+        ...
+
+class IVistockVnDirectFinancialStatementsIndexSearch(Protocol):
+    def search(
+        self,
+        code: str,
+        start_year: int = 2000,
+        end_year: int = datetime.now().year,
+        report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
+        ...
+
+class AsyncIVistockVnDirectFinancialStatementsIndexSearch(Protocol):
+    async def async_search(
+        self,
+        code: str,
+        start_year: int = 2000,
+        end_year: int = datetime.now().year,
+        report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
         ...
 
 class IVistock24HMoneyStockSectionSearch(Protocol):

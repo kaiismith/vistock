@@ -16,7 +16,7 @@ from vistock.core.enums import (
 from vistock.modules._24hmoney.scrapers import Vistock24HMoneyStockSectionScraper
 from vistock.modules._24hmoney.parsers import Vistock24HMoneyStockSectionParser
 from vistock.core.utils import VistockValidator, VistockNormalizator, VistockMapper
-from typing import List, Dict, Union, Any, overload
+from typing import List, Dict, Union, Any
 import asyncio
 import logging
 
@@ -53,62 +53,6 @@ class Vistock24HMoneyStockSectionSearch:
                 'Invalid value: "timeout" must be a positive integer greater than zero.'
             )
         self._timeout = value
-
-    @overload
-    def search(
-        self
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-    @overload
-    def search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-    @overload
-    def search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-    @overload
-    def search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str],
-        company_type: Union[Vistock24HMoneyCompanyCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-    @overload
-    def search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str],
-        company_type: Union[Vistock24HMoneyCompanyCategory, str],
-        letter: Union[Vistock24HMoneyLetterCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-    @overload
-    def search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str],
-        company_type: Union[Vistock24HMoneyCompanyCategory, str],
-        letter: Union[Vistock24HMoneyLetterCategory, str],
-        limit: int
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
 
     def search(
         self,
@@ -176,62 +120,38 @@ class Vistock24HMoneyStockSectionSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-    @overload
-    async def async_search(
-        self
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
+class AsyncVistock24HMoneyStockSectionSearch:
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
+        if timeout <= 0:
+            raise ValueError(
+                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
+            )
+        self._timeout = timeout
 
-    @overload
-    async def async_search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
+        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
+            raise ValueError(
+                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
+            )
 
-    @overload
-    async def async_search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
+        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
+        self._base_url = DEFAULT_24HMONEY_BASE_URL
+        self._domain = DEFAULT_24HMONEY_DOMAIN
+        self._scraper = Vistock24HMoneyStockSectionScraper()
+        self._parser = Vistock24HMoneyStockSectionParser()
+        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
 
-    @overload
-    async def async_search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str],
-        company_type: Union[Vistock24HMoneyCompanyCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-    @overload
-    async def async_search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str],
-        company_type: Union[Vistock24HMoneyCompanyCategory, str],
-        letter: Union[Vistock24HMoneyLetterCategory, str]
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-    @overload
-    async def async_search(
-        self,
-        *,
-        industry: Union[Vistock24HMoneyIndustryCategory, str],
-        floor: Union[Vistock24HMoneyFloorCategory, str],
-        company_type: Union[Vistock24HMoneyCompanyCategory, str],
-        letter: Union[Vistock24HMoneyLetterCategory, str],
-        limit: int
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
+    @property
+    def timeout(self) -> float:
+        return self._timeout
+    
+    @timeout.setter
+    def timeout(self, value: int) -> None:
+        if value <= 0:
+            raise ValueError(
+                'Invalid value: "timeout" must be a positive integer greater than zero.'
+            )
+        self._timeout = value
+        
     async def async_search(
         self,
         industry: Union[Vistock24HMoneyIndustryCategory, str] = 'all',

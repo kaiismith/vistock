@@ -24,6 +24,27 @@ class IVistockVnDirectFundamentalIndexParser(Protocol):
     ) -> List[str]:
         ...
 
+class IVistockVnDirectFinancialModelsParser(Protocol):
+    def parse_url_path(
+        self,
+        code: str,
+        model_type_code: str,
+        limit: int = 2000
+    ) -> str:
+        ...
+
+class IVistockVnDirectFinancialStatementsIndexParser(Protocol):
+    def parse_url_path(
+        self,
+        code: str,
+        start_year: int = 2000,
+        end_year: int = datetime.now().year,
+        report_type_code: str = 'ANNUAL',
+        model_type_code: str = 'all',
+        limit: int = 10000
+    ) -> List[str]:
+        ...
+
 class IVistock24HMoneyStockSectionParser(Protocol):
     def parse_url_path(
         self,

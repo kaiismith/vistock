@@ -27,8 +27,8 @@ pip install vistock
 
 ## Quick Start
 ```python
-import asyncio
 from vistock.modules.vndirect.search import VistockVnDirectStockIndexSearch
+import asyncio
 import json
 
 async def main():

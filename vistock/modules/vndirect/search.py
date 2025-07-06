@@ -1,26 +1,40 @@
 from vistock.core.constants import (
     DEFAULT_VNDIRECT_STOCK_INDEX_BASE_URL,
     DEFAULT_VNDIRECT_FUNDAMENTAL_INDEX_BASE_URL, 
+    DEFAULT_VNDIRECT_FINANCIAL_MODELS_BASE_URL,
+    DEFAULT_VNDIRECT_FINANCIAL_STATEMENTS_BASE_URL,
     DEFAULT_VNDIRECT_DOMAIN, 
     DEFAULT_TIMEOUT
 )
 from vistock.core.models import (
     StandardVnDirectStockIndex,
     AdvancedVnDirectStockIndex,
+    StandardVnDirectFinancialModel,
     StandardVnDirectStockIndexSearchResults,
     AdvancedVnDirectStockIndexSearchResults,
-    StandardVnDirectFundamentalIndexSearchResults
+    StandardVnDirectFundamentalIndexSearchResults,
+    StandardVnDirectFinancialModelSearchResults,
+    StandardVnDirectFinancialStatementsIndex,
+    StandardVnDirectFinancialStatementsIndexSearchResults
+)
+from vistock.core.enums import (
+    VistockVnDirectFinancialModelsCategory,
+    VistockVnDirectReportTypeCategory
 )
 from vistock.modules.vndirect.scrapers import (
     VistockVnDirectStockIndexScraper,
-    VistockVnDirectFundamentalIndexScraper
+    VistockVnDirectFundamentalIndexScraper,
+    VistockVnDirectFinancialModelsScraper,
+    VistockVnDirectFinancialStatementsIndexScraper
 )
 from vistock.modules.vndirect.parsers import (
     VistockVnDirectStockIndexParser,
-    VistockVnDirectFundamentalIndexParser
+    VistockVnDirectFundamentalIndexParser,
+    VistockVnDirectFinancialModelsParser,
+    VistockVnDirectFinancialStatementsIndexParser
 )
-from vistock.core.utils import VistockValidator
-from typing import List, Dict, Union, Literal, Any, overload
+from vistock.core.utils import VistockValidator, VistockNormalizator
+from typing import List, Dict, Tuple, Union, Literal, Any
 from datetime import datetime
 import asyncio
 import logging
@@ -59,42 +73,6 @@ class VistockVnDirectStockIndexSearch:
             )
         self._timeout = value
 
-    @overload
-    def search(
-        self,
-        code: str,
-        *,
-        start_date: str,
-        end_date: str,
-        resolution: Literal['day', 'week', 'month', 'year']
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
-        ...
-
-    @overload
-    def search(
-        self,
-        code: str,
-        *,
-        start_date: str,
-        end_date: str,
-        resolution: Literal['day', 'week', 'month', 'year'],
-        advanced: bool
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
-        ...
-
-    @overload
-    def search(
-        self,
-        code: str,
-        *,
-        start_date: str,
-        end_date: str,
-        resolution: Literal['day', 'week', 'month', 'year'],
-        advanced: bool,
-        ascending: bool
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
-        ...
-
     def search(
         self,
         code: str,
@@ -106,11 +84,6 @@ class VistockVnDirectStockIndexSearch:
         ascending: bool = False
     ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
         try:
-            if not VistockValidator.validate_code(code):
-                raise ValueError(
-                    'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
-                )
-
             if not VistockValidator.validate_resolution(resolution):
                 raise ValueError(
                     'Invalid resolution: "resolution" must be one of the following values: "day", "week", "month", or "year". Please ensure that the resolution is specified correctly.'
@@ -146,7 +119,7 @@ class VistockVnDirectStockIndexSearch:
                         code=item['code'],
                         date=item['date'],
                         time=item['time'],
-                        tfloor=item.get('floor', ''),
+                        tfloor=item['floor'],
                         type=item['type'],
                         mopen=item['adOpen'],
                         mhigh=item['adHigh'],
@@ -164,41 +137,37 @@ class VistockVnDirectStockIndexSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-    @overload
-    async def async_search(
-        self,
-        code: str,
-        *,
-        start_date: str,
-        end_date: str,
-        resolution: Literal['day', 'week', 'month', 'year']
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
-        ...
+class AsyncVistockVnDirectStockIndexSearch:
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
+        if timeout <= 0:
+            raise ValueError(
+                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
+            )
+        self._timeout = timeout
 
-    @overload
-    async def async_search(
-        self,
-        code: str,
-        *,
-        start_date: str,
-        end_date: str,
-        resolution: Literal['day', 'week', 'month', 'year'],
-        advanced: bool
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
-        ...
+        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
+            raise ValueError(
+                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
+            )
 
-    @overload 
-    async def async_search(
-        self,
-        code: str,
-        *,
-        start_date: str,
-        end_date: str,
-        resolution: Literal['day', 'week', 'month', 'year'],
-        advanced: bool,
-        ascending: bool
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
-        ...
+        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
+        self._base_url = DEFAULT_VNDIRECT_STOCK_INDEX_BASE_URL
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._scraper = VistockVnDirectStockIndexScraper()
+        self._parser = VistockVnDirectStockIndexParser()
+        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
+
+    @property
+    def timeout(self) -> float:
+        return self._timeout
+    
+    @timeout.setter
+    def timeout(self, value: int) -> None:
+        if value <= 0:
+            raise ValueError(
+                'Invalid value: "timeout" must be a positive integer greater than zero.'
+            )
+        self._timeout = value
 
     async def async_search(
         self,
@@ -211,11 +180,6 @@ class VistockVnDirectStockIndexSearch:
         ascending: bool = False
     ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
         try:
-            if not VistockValidator.validate_code(code):
-                raise ValueError(
-                    'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
-                )
-
             if not VistockValidator.validate_resolution(resolution):
                 raise ValueError(
                     'Invalid resolution: "resolution" must be one of the following values: "day", "week", "month", or "year". Please ensure that the resolution is specified correctly.'
@@ -253,7 +217,7 @@ class VistockVnDirectStockIndexSearch:
                         code=item['code'],
                         date=item['date'],
                         time=item['time'],
-                        tfloor=item.get('floor', ''),
+                        tfloor=item['floor'],
                         type=item['type'],
                         mopen=item['adOpen'],
                         mhigh=item['adHigh'],
@@ -271,7 +235,7 @@ class VistockVnDirectStockIndexSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-class VistockVnDirectFundamentalSearch:
+class VistockVnDirectFundamentalIndexSearch:
     def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
         if timeout <= 0:
             raise ValueError(
@@ -305,11 +269,6 @@ class VistockVnDirectFundamentalSearch:
 
     def search(self, code: str) -> StandardVnDirectFundamentalIndexSearchResults:
         try:
-            if not VistockValidator.validate_code(code):
-                raise ValueError(
-                    'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
-                )
-            
             results: List[List[Dict[str, Any]]] = []
             
             urls = self._parser.parse_url_path(code=code)
@@ -319,8 +278,8 @@ class VistockVnDirectFundamentalSearch:
 
                 if not data:
                     raise ValueError(
-                    'No data found for the given parameters. Please check the code, start date, and end date to ensure they are correct and that data exists for the specified range.'
-                )
+                        'No data found for the given parameters. Please check the code to ensure they are correct.'
+                    )
                 
                 results.append(data)
 
@@ -355,13 +314,40 @@ class VistockVnDirectFundamentalSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
+class AsyncVistockVnDirectFundamentalIndexSearch:
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
+        if timeout <= 0:
+            raise ValueError(
+                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
+            )
+        self._timeout = timeout
+
+        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
+            raise ValueError(
+                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
+            )
+
+        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
+        self._base_url = DEFAULT_VNDIRECT_FUNDAMENTAL_INDEX_BASE_URL
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._scraper = VistockVnDirectFundamentalIndexScraper()
+        self._parser = VistockVnDirectFundamentalIndexParser()
+        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
+
+    @property
+    def timeout(self) -> float:
+        return self._timeout
+    
+    @timeout.setter
+    def timeout(self, value: int) -> None:
+        if value <= 0:
+            raise ValueError(
+                'Invalid value: "timeout" must be a positive integer greater than zero.'
+            )
+        self._timeout = value
+
     async def async_search(self, code: str) -> StandardVnDirectFundamentalIndexSearchResults:
-        try:
-            if not VistockValidator.validate_code(code):
-                raise ValueError(
-                    'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
-                )
-            
+        try:            
             results: List[List[Dict[str, Any]]] = []
             
             urls = self._parser.parse_url_path(code=code)
@@ -372,8 +358,8 @@ class VistockVnDirectFundamentalSearch:
 
                 if not data:
                     raise ValueError(
-                    'No data found for the given parameters. Please check the code, start date, and end date to ensure they are correct and that data exists for the specified range.'
-                )
+                        'No data found for the given parameters. Please check the code to ensure they are correct.'
+                    )
                 
                 results.append(data)
 
@@ -407,3 +393,267 @@ class VistockVnDirectFundamentalSearch:
         except Exception:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
+
+class VistockVnDirectFinancialModelsSearch:
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
+        if timeout <= 0:
+            raise ValueError(
+                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
+            )
+        self._timeout = timeout
+
+        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
+            raise ValueError(
+                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
+            )
+
+        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
+        self._base_url = DEFAULT_VNDIRECT_FINANCIAL_MODELS_BASE_URL
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._scraper = VistockVnDirectFinancialModelsScraper()
+        self._parser = VistockVnDirectFinancialModelsParser()
+        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
+
+    def search(
+        self,
+        code: str,
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialModelSearchResults:
+        try:
+            if model_type != 'all':
+                if not VistockValidator.validate_enum_value(model_type, VistockVnDirectFinancialModelsCategory):
+                    raise ValueError(f'"{model_type}" is not a recognized model type. Use a valid enum name or code.')
+                model_type_code = VistockNormalizator.normalize_enum_value(model_type, VistockVnDirectFinancialModelsCategory)
+            else:
+                model_type_code = 'all'
+
+            url = f'{self._base_url}{self._parser.parse_url_path(code=code, model_type_code=model_type_code)}'
+            data: List[Dict[str, Any]] = self._scraper.fetch(url=url).get('data', [])
+
+            if not data:
+                raise ValueError(
+                    'No data found for the given parameters. Please check the code, and model type to ensure they are correct.'
+                )
+
+            return StandardVnDirectFinancialModelSearchResults(
+                results=[
+                    StandardVnDirectFinancialModel(
+                        model_type=item['modelType'],
+                        model_type_name=item['modelTypeName'],
+                        model_vn_desc=item['modelVnDesc'],
+                        model_en_desc=item['modelEnDesc'],
+                        company_form=item['companyForm'],
+                        note=item['note'],
+                        code_list=[code.strip() for code in item['codeList'].split(',')],
+                        item_code=item['itemCode'],
+                        item_vn_name=item['itemVnName'],
+                        item_en_name=item['itemEnName'],
+                        display_order=item['displayOrder'],
+                        display_level=item['displayLevel'],
+                        form_type=item['formType']
+                    ) for item in data
+                ],
+                total_results=len(data)
+            )
+
+        except Exception:
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
+            raise
+
+class AsyncVistockVnDirectFinancialModelsSearch:
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
+        if timeout <= 0:
+            raise ValueError(
+                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
+            )
+        self._timeout = timeout
+
+        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
+            raise ValueError(
+                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
+            )
+
+        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
+        self._base_url = DEFAULT_VNDIRECT_FINANCIAL_MODELS_BASE_URL
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._scraper = VistockVnDirectFinancialModelsScraper()
+        self._parser = VistockVnDirectFinancialModelsParser()
+        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
+
+    async def async_search(
+        self,
+        code: str,
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialModelSearchResults:
+        try:
+            if model_type != 'all':
+                if not VistockValidator.validate_enum_value(model_type, VistockVnDirectFinancialModelsCategory):
+                    raise ValueError(f'"{model_type}" is not a recognized model type. Use a valid enum name or code.')
+                model_type_code = VistockNormalizator.normalize_enum_value(model_type, VistockVnDirectFinancialModelsCategory)
+            else:
+                model_type_code = 'all'
+
+            url = f'{self._base_url}{self._parser.parse_url_path(code=code, model_type_code=model_type_code)}'
+            response = await self._scraper.async_fetch(url=url)
+            data: List[Dict[str, Any]] = response.get('data', [])
+
+            if not data:
+                raise ValueError(
+                    'No data found for the given parameters. Please check the code, and model type to ensure they are correct.'
+                )
+
+            return StandardVnDirectFinancialModelSearchResults(
+                results=[
+                    StandardVnDirectFinancialModel(
+                        model_type=int(item['modelType']),
+                        model_type_name=item['modelTypeName'],
+                        model_vn_desc=item['modelVnDesc'],
+                        model_en_desc=item['modelEnDesc'],
+                        company_form=item['companyForm'],
+                        note=item['note'],
+                        code_list=[code.strip() for code in item['codeList'].split(',')],
+                        item_code=int(item['itemCode']),
+                        item_vn_name=item['itemVnName'],
+                        item_en_name=item['itemEnName'],
+                        display_order=int(item['displayOrder']),
+                        display_level=int(item['displayLevel']),
+                        form_type=item['formType']
+                    ) for item in data
+                ],
+                total_results=len(data)
+            )
+
+        except Exception:
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
+            raise
+
+class VistockVnDirectFinancialStatementsIndexSearch:
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
+        if timeout <= 0:
+            raise ValueError(
+                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
+            )
+        self._timeout = timeout
+
+        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
+            raise ValueError(
+                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
+            )
+
+        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
+        self._base_url = DEFAULT_VNDIRECT_FINANCIAL_STATEMENTS_BASE_URL
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._scraper = VistockVnDirectFinancialStatementsIndexScraper()
+        self._parser = VistockVnDirectFinancialStatementsIndexParser()
+        self._finanical_models_search = VistockVnDirectFinancialModelsSearch()
+        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
+
+    def search(
+        self,
+        code: str,
+        start_year: int = 2000,
+        end_year: int = datetime.now().year,
+        report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
+        try:
+            financial_models = self._finanical_models_search.search(
+                code=code,
+                model_type=model_type
+            )
+
+            if report_type != 'ANNUAL':
+                if not VistockValidator.validate_enum_value(report_type, VistockVnDirectReportTypeCategory):
+                    raise ValueError(f'"{report_type}" is not a recognized report type. Use a valid enum name or code.')
+                report_type_code = VistockNormalizator.normalize_enum_value(report_type, VistockVnDirectReportTypeCategory)
+            else:
+                report_type_code = 'all'
+
+            if model_type != 'all':
+                if not VistockValidator.validate_enum_value(model_type, VistockVnDirectFinancialModelsCategory):
+                    raise ValueError(f'"{model_type}" is not a recognized model type. Use a valid enum name or code.')
+                model_type_code = VistockNormalizator.normalize_enum_value(model_type, VistockVnDirectFinancialModelsCategory)
+            else:
+                model_type_code = 'all'     
+
+            results: List[StandardVnDirectFinancialStatementsIndex] = []
+
+            urls = self._parser.parse_url_path(
+                code=code,
+                start_year=start_year,
+                end_year=end_year,
+                report_type_code=report_type_code,
+                model_type_code=model_type_code
+            )
+
+            model_lookup: Dict[Tuple[int, int], StandardVnDirectFinancialModel] = {
+                (model.model_type, model.item_code): model
+                for model in financial_models.results
+            }
+
+            for url in urls:
+                url = f'{self._base_url}{url}'
+                data: List[Dict[str, Any]] = self._scraper.fetch(url).get('data', [])
+
+                if not data:
+                    raise ValueError(
+                    'No data found for the given parameters. Please check the code, start year, end year, report type, and model type to ensure they are correct and that data exists for the specified range.'
+                )
+
+                for item in data:
+                    model_key = (item['modelType'], item['itemCode'])
+                    model = model_lookup.get(model_key)
+                    if model is None:
+                        continue
+
+                    index = StandardVnDirectFinancialStatementsIndex(
+                        code=item['code'],
+                        model=model,
+                        report_type=item['reportType'],
+                        numeric_value=item['numericValue'],
+                        fiscal_date=item['fiscalDate'],
+                        created_date=item['createdDate'],
+                        modified_date=item['modifiedDate']
+                    )
+                    results.append(index)
+
+            return StandardVnDirectFinancialStatementsIndexSearchResults(
+                results=results,
+                total_results=len(results)
+            )
+        
+        except Exception:
+            logger.error('An unexpected error occurred during the search operation.', exc_info=True)
+            raise
+
+class AsyncVistockVnDirectFinancialStatementsIndexSearch:
+    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
+        if timeout <= 0:
+            raise ValueError(
+                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
+            )
+        self._timeout = timeout
+
+        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
+            raise ValueError(
+                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
+            )
+
+        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
+        self._base_url = DEFAULT_VNDIRECT_FINANCIAL_STATEMENTS_BASE_URL
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._scraper = VistockVnDirectFinancialStatementsIndexScraper()
+        self._parser = VistockVnDirectFinancialStatementsIndexParser()
+        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
+
+    async def async_search(
+        self,
+        code: str,
+        start_year: int = 2000,
+        end_year: int = datetime.now().year,
+        report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
+        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
+    ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
+        ...   
+
+

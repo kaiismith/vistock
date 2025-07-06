@@ -76,7 +76,6 @@ class VistockValidator:
     
     @staticmethod
     def validate_enum_value(value: Union[str, Enum], enum_cls: Type[Enum]) -> bool:
-        print(value, enum_cls)
         if isinstance(value, enum_cls):
             return True
 
@@ -111,4 +110,27 @@ class VistockMapper:
                 return section.name.replace('_', ' ').title()
             
         raise ValueError(f'No English mapping found for: {vn_section}')
+    
+class VistockGenerator:
+    QUARTERS = ['03-31', '06-30', '09-30', '12-31']
+
+    @staticmethod
+    def generate_annual_dates(start_year: int, end_year: int) -> str:
+        dates: List[str] = []
+
+        for year in range(end_year, start_year - 1, -1):
+            dates.append(f'{year}-12-31')
+
+        return ','.join(dates)
+    
+    @staticmethod
+    def generate_quarterly_dates(start_year: int, end_year: int) -> str:
+        dates: List[str] = []
+
+        for year in range(end_year, start_year - 1, -1):
+            for q in reversed(VistockGenerator.QUARTERS):
+                dates.append(f'{year}-{q}')
+
+        return ','.join(dates)
+
         

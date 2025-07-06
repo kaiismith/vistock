@@ -1,9 +1,12 @@
 from vistock.core.interfaces.ivistockparser import (
     IViStockVnDirectStockIndexParser,
-    IVistockVnDirectFundamentalIndexParser
+    IVistockVnDirectFundamentalIndexParser,
+    IVistockVnDirectFinancialModelsParser,
+    IVistockVnDirectFinancialStatementsIndexParser
 )
 from vistock.core.constants import DEFAULT_VNDIRECT_DOMAIN
-from vistock.core.utils import VistockValidator
+from vistock.core.enums import VistockVnDirectFinancialModelsCategory
+from vistock.core.utils import VistockValidator, VistockGenerator
 from urllib.parse import urlencode
 from datetime import datetime
 from typing import List, Dict, Any
@@ -19,7 +22,7 @@ class VistockVnDirectStockIndexParser(IViStockVnDirectStockIndexParser):
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
         limit: int = 1
     ) -> str:
-        if not VistockValidator.validate_code(code):
+        if not VistockValidator.validate_code(code=code):
             raise ValueError(
                 'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
             )
@@ -55,20 +58,91 @@ class VistockVnDirectStockIndexParser(IViStockVnDirectStockIndexParser):
         }
 
         return f'?{urlencode(query_params)}'
-    
+            
 class VistockVnDirectFundamentalIndexParser(IVistockVnDirectFundamentalIndexParser):
     def __init__(self):
         self._domain = DEFAULT_VNDIRECT_DOMAIN
         self._url_templates = [
-            "?filter=ratioCode:MARKETCAP,NMVOLUME_AVG_CR_10D,PRICE_HIGHEST_CR_52W,PRICE_LOWEST_CR_52W,OUTSTANDING_SHARES,FREEFLOAT,BETA,PRICE_TO_EARNINGS,PRICE_TO_BOOK,DIVIDEND_YIELD,BVPS_CR,&where=code:{code}&order=reportDate&fields=ratioCode,value",
-            "?filter=ratioCode:ROAE_TR_AVG5Q,ROAA_TR_AVG5Q,EPS_TR,&where=code:{code}&order=reportDate&fields=ratioCode,value"
+            '?filter=ratioCode:MARKETCAP,NMVOLUME_AVG_CR_10D,PRICE_HIGHEST_CR_52W,PRICE_LOWEST_CR_52W,OUTSTANDING_SHARES,FREEFLOAT,BETA,PRICE_TO_EARNINGS,PRICE_TO_BOOK,DIVIDEND_YIELD,BVPS_CR,&where=code:{code}&order=reportDate&fields=ratioCode,value',
+            '?filter=ratioCode:ROAE_TR_AVG5Q,ROAA_TR_AVG5Q,EPS_TR,&where=code:{code}&order=reportDate&fields=ratioCode,value'
         ]
 
     def parse_url_path(self, code: str) -> List[str]:
-        if not VistockValidator.validate_code(code):
+        if not VistockValidator.validate_code(code=code):
             raise ValueError(
                 'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
             )
         
         return [template.format(code=code) for template in self._url_templates]
     
+class VistockVnDirectFinancialModelsParser(IVistockVnDirectFinancialModelsParser):
+    def __init__(self):
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._url_template = '?sort=displayOrder:asc&q=codeList:{code}~modelType:{model_type_code}~note:TT199/2014/TT-BTC,TT334/2016/TT-BTC,TT49/2014/TT-NHNN,TT202/2014/TT-BTC~displayLevel:0,1,2,3&size={limit}'
+
+    def parse_url_path(
+        self, 
+        code: str, 
+        model_type_code: str, 
+        limit: int = 2000
+    ) -> str:
+        if not VistockValidator.validate_code(code=code):
+            raise ValueError(
+                'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
+            )
+        
+        return self._url_template.format(
+            code=code,
+            model_type_code=model_type_code,
+            limit=limit
+        )
+    
+class VistockVnDirectFinancialStatementsIndexParser(IVistockVnDirectFinancialStatementsIndexParser):
+    def __init__(self):
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._url_template = '?q=code:{code}~reportType:{report_type_code}~modelType:{model_type_code}~fiscalDate:{fiscal_date}&sort=fiscalDate&size={limit}'
+
+    def parse_url_path(
+        self,
+        code: str,
+        start_year: int = 2000,
+        end_year: int = datetime.now().year,
+        report_type_code: str = 'ANNUAL',
+        model_type_code: str = 'all',
+        limit: int = 10000
+    ) -> List[str]:
+        if not VistockValidator.validate_code(code=code):
+            raise ValueError(
+                'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
+            )
+        
+        if report_type_code == 'QUARTER':
+            fiscal_date = VistockGenerator.generate_quarterly_dates(start_year=start_year, end_year=end_year)
+
+        fiscal_date = VistockGenerator.generate_annual_dates(start_year=start_year, end_year=end_year)
+
+        urls: List[str] = []
+
+        if model_type_code == 'all':
+            for category in VistockVnDirectFinancialModelsCategory:
+                url = self._url_template.format(
+                    code=code,
+                    report_type_code=report_type_code,
+                    model_type_code=category.value,
+                    fiscal_date=fiscal_date,
+                    limit=limit
+                )
+                urls.append(f'{url}')
+
+            return urls
+        else:
+            url = self._url_template.format(
+                code=code,
+                report_type_code=report_type_code,
+                model_type_code=model_type_code,
+                fiscal_date=fiscal_date,
+                limit=limit
+            )
+            urls.append(f'{url}')
+
+            return urls

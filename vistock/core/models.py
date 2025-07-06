@@ -73,6 +73,52 @@ class StandardVnDirectFundamentalIndexSearchResults(BaseModel):
         fields = ', '.join(f"{k}={v!r}" for k, v in self.model_dump().items())
         return f'{self.__class__.__name__}({fields})'
     
+class StandardVnDirectFinancialModel(BaseModel):
+    model_type: int
+    model_type_name: str
+    model_vn_desc: str
+    model_en_desc: str
+    company_form: str
+    note: str
+    code_list: List[str]
+    item_code: int
+    item_vn_name: str
+    item_en_name: str
+    display_order: int
+    display_level: int
+    form_type: str 
+
+    def __repr__(self):
+        return super().__repr__()
+
+class StandardVnDirectFinancialModelSearchResults(BaseModel):
+    results: List[StandardVnDirectFinancialModel]
+    total_results: int
+
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
+    
+class StandardVnDirectFinancialStatementsIndex(BaseModel):
+    code: str
+    model: StandardVnDirectFinancialModel
+    report_type: str
+    numeric_value: int
+    fiscal_date: str
+    created_date: str
+    modified_date: str
+
+    def __repr__(self):
+        return super().__repr__()
+
+class StandardVnDirectFinancialStatementsIndexSearchResults(BaseModel):
+    results: List[StandardVnDirectFinancialStatementsIndex]
+    total_results: int
+
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
+    
 class Standard24HMoneyStockSection(BaseModel):
     code: str
     company_name: str
