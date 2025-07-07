@@ -15,6 +15,10 @@ from vistock.core.enums import (
 )
 from vistock.modules._24hmoney.scrapers import Vistock24HMoneyStockSectionScraper
 from vistock.modules._24hmoney.parsers import Vistock24HMoneyStockSectionParser
+from vistock.core.interfaces.ivistocksearch import (
+    IVistock24HMoneyStockSectionSearch,
+    AsyncIVistock24HMoneyStockSectionSearch
+)
 from vistock.core.utils import VistockValidator, VistockNormalizator, VistockMapper
 from typing import List, Dict, Union, Any
 import asyncio
@@ -22,7 +26,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class Vistock24HMoneyStockSectionSearch:
+class Vistock24HMoneyStockSectionSearch(IVistock24HMoneyStockSectionSearch, AsyncIVistock24HMoneyStockSectionSearch):
     def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
         if timeout <= 0:
             raise ValueError(
@@ -119,38 +123,6 @@ class Vistock24HMoneyStockSectionSearch:
         except Exception:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
-
-class AsyncVistock24HMoneyStockSectionSearch:
-    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
-        if timeout <= 0:
-            raise ValueError(
-                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
-            )
-        self._timeout = timeout
-
-        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
-            raise ValueError(
-                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
-            )
-
-        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
-        self._base_url = DEFAULT_24HMONEY_BASE_URL
-        self._domain = DEFAULT_24HMONEY_DOMAIN
-        self._scraper = Vistock24HMoneyStockSectionScraper()
-        self._parser = Vistock24HMoneyStockSectionParser()
-        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
-
-    @property
-    def timeout(self) -> float:
-        return self._timeout
-    
-    @timeout.setter
-    def timeout(self, value: int) -> None:
-        if value <= 0:
-            raise ValueError(
-                'Invalid value: "timeout" must be a positive integer greater than zero.'
-            )
-        self._timeout = value
         
     async def async_search(
         self,

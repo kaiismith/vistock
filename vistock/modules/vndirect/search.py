@@ -21,6 +21,16 @@ from vistock.core.enums import (
     VistockVnDirectFinancialModelsCategory,
     VistockVnDirectReportTypeCategory
 )
+from vistock.core.interfaces.ivistocksearch import (
+    IVistockVnDirectStockIndexSearch,
+    AsyncIVistockVnDirectStockIndexSearch,
+    IVistockVnDirectFundamentalIndexSearch,
+    AsyncIVistockVnDirectFundamentalIndexSearch,
+    IVistockVnDirectFinancialModelsSearch,
+    AsyncIVistockVnDirectFinancialModelsSearch,
+    IVistockVnDirectFinancialStatementsIndexSearch,
+    AsyncIVistockVnDirectFinancialStatementsIndexSearch
+)
 from vistock.modules.vndirect.scrapers import (
     VistockVnDirectStockIndexScraper,
     VistockVnDirectFundamentalIndexScraper,
@@ -41,7 +51,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class VistockVnDirectStockIndexSearch:
+class VistockVnDirectStockIndexSearch(IVistockVnDirectStockIndexSearch, AsyncIVistockVnDirectStockIndexSearch):
     def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
         if timeout <= 0:
             raise ValueError(
@@ -76,7 +86,6 @@ class VistockVnDirectStockIndexSearch:
     def search(
         self,
         code: str,
-        *,
         start_date: str = '2012-01-01',
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
         resolution: Literal['day', 'week', 'month', 'year'] = 'day',
@@ -137,42 +146,9 @@ class VistockVnDirectStockIndexSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-class AsyncVistockVnDirectStockIndexSearch:
-    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
-        if timeout <= 0:
-            raise ValueError(
-                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
-            )
-        self._timeout = timeout
-
-        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
-            raise ValueError(
-                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
-            )
-
-        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
-        self._base_url = DEFAULT_VNDIRECT_STOCK_INDEX_BASE_URL
-        self._domain = DEFAULT_VNDIRECT_DOMAIN
-        self._scraper = VistockVnDirectStockIndexScraper()
-        self._parser = VistockVnDirectStockIndexParser()
-        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
-
-    @property
-    def timeout(self) -> float:
-        return self._timeout
-    
-    @timeout.setter
-    def timeout(self, value: int) -> None:
-        if value <= 0:
-            raise ValueError(
-                'Invalid value: "timeout" must be a positive integer greater than zero.'
-            )
-        self._timeout = value
-
     async def async_search(
         self,
         code: str,
-        *,
         start_date: str = '2012-01-01',
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
         resolution: Literal['day', 'week', 'month', 'year'] = 'day',
@@ -235,7 +211,7 @@ class AsyncVistockVnDirectStockIndexSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-class VistockVnDirectFundamentalIndexSearch:
+class VistockVnDirectFundamentalIndexSearch(IVistockVnDirectFundamentalIndexSearch, AsyncIVistockVnDirectFundamentalIndexSearch):
     def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
         if timeout <= 0:
             raise ValueError(
@@ -314,38 +290,6 @@ class VistockVnDirectFundamentalIndexSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-class AsyncVistockVnDirectFundamentalIndexSearch:
-    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
-        if timeout <= 0:
-            raise ValueError(
-                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
-            )
-        self._timeout = timeout
-
-        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
-            raise ValueError(
-                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
-            )
-
-        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
-        self._base_url = DEFAULT_VNDIRECT_FUNDAMENTAL_INDEX_BASE_URL
-        self._domain = DEFAULT_VNDIRECT_DOMAIN
-        self._scraper = VistockVnDirectFundamentalIndexScraper()
-        self._parser = VistockVnDirectFundamentalIndexParser()
-        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
-
-    @property
-    def timeout(self) -> float:
-        return self._timeout
-    
-    @timeout.setter
-    def timeout(self, value: int) -> None:
-        if value <= 0:
-            raise ValueError(
-                'Invalid value: "timeout" must be a positive integer greater than zero.'
-            )
-        self._timeout = value
-
     async def async_search(self, code: str) -> StandardVnDirectFundamentalIndexSearchResults:
         try:            
             results: List[List[Dict[str, Any]]] = []
@@ -394,7 +338,7 @@ class AsyncVistockVnDirectFundamentalIndexSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-class VistockVnDirectFinancialModelsSearch:
+class VistockVnDirectFinancialModelsSearch(IVistockVnDirectFinancialModelsSearch, AsyncIVistockVnDirectFinancialModelsSearch):
     def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
         if timeout <= 0:
             raise ValueError(
@@ -467,26 +411,6 @@ class VistockVnDirectFinancialModelsSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-class AsyncVistockVnDirectFinancialModelsSearch:
-    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
-        if timeout <= 0:
-            raise ValueError(
-                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
-            )
-        self._timeout = timeout
-
-        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
-            raise ValueError(
-                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
-            )
-
-        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
-        self._base_url = DEFAULT_VNDIRECT_FINANCIAL_MODELS_BASE_URL
-        self._domain = DEFAULT_VNDIRECT_DOMAIN
-        self._scraper = VistockVnDirectFinancialModelsScraper()
-        self._parser = VistockVnDirectFinancialModelsParser()
-        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
-
     async def async_search(
         self,
         code: str,
@@ -541,7 +465,7 @@ class AsyncVistockVnDirectFinancialModelsSearch:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
 
-class VistockVnDirectFinancialStatementsIndexSearch:
+class VistockVnDirectFinancialStatementsIndexSearch(IVistockVnDirectFinancialStatementsIndexSearch, AsyncIVistockVnDirectFinancialStatementsIndexSearch):
     def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
         if timeout <= 0:
             raise ValueError(
@@ -639,27 +563,6 @@ class VistockVnDirectFinancialStatementsIndexSearch:
         except Exception:
             logger.error('An unexpected error occurred during the search operation.', exc_info=True)
             raise
-
-class AsyncVistockVnDirectFinancialStatementsIndexSearch:
-    def __init__(self, timeout: float = DEFAULT_TIMEOUT, **kwargs: Any) -> None:
-        if timeout <= 0:
-            raise ValueError(
-                'Invalid configuration: "timeout" must be a strictly positive integer value representing the maximum allowable wait time for the operation.'
-            )
-        self._timeout = timeout
-
-        if 'semaphore_limit' in kwargs and (not isinstance(kwargs['semaphore_limit'], int) or kwargs['semaphore_limit'] <= 0):
-            raise ValueError(
-                'Invalid configuration: "semaphore_limit" must be a positive integer, indicating the maximum number of concurrent asynchronous operations permitted.'
-            )
-
-        self._semaphore_limit = kwargs.get('semaphore_limit', 5)
-        self._base_url = DEFAULT_VNDIRECT_FINANCIAL_STATEMENTS_BASE_URL
-        self._domain = DEFAULT_VNDIRECT_DOMAIN
-        self._scraper = VistockVnDirectFinancialStatementsIndexScraper()
-        self._parser = VistockVnDirectFinancialStatementsIndexParser()
-        self._finanical_models_search = AsyncVistockVnDirectFinancialModelsSearch()
-        self._semaphore = asyncio.Semaphore(self._semaphore_limit)
 
     async def async_search(
         self,
