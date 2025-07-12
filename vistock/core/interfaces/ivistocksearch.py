@@ -4,7 +4,9 @@ from vistock.core.models import (
     StandardVnDirectFundamentalIndexSearchResults,
     Standard24HMoneyStockSectionSearchResults,
     StandardVnDirectFinancialModelSearchResults,
-    StandardVnDirectFinancialStatementsIndexSearchResults
+    StandardVnDirectFinancialStatementsIndexSearchResults,
+    StandardDNSEStockIndexSearchResults,
+    StandardVietstockStockIndexSearchResults
 )
 from vistock.core.enums import (
     Vistock24HMoneyIndustryCategory,
@@ -15,7 +17,7 @@ from vistock.core.enums import (
     VistockVnDirectReportTypeCategory
 )
 from typing import Union, Protocol, Literal
-from datetime import datetime
+from datetime import datetime, timezone
 
 class IVistockVnDirectStockIndexSearch(Protocol):
     def search(
@@ -23,7 +25,7 @@ class IVistockVnDirectStockIndexSearch(Protocol):
         code: str,
         start_date: str = '2012-01-01',
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
-        resolution: Literal['day', 'week', 'month', 'year'] = 'day',
+        resolution: Literal['day'] = 'day',
         advanced: bool = True,
         ascending: bool = False
     ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
@@ -35,7 +37,7 @@ class AsyncIVistockVnDirectStockIndexSearch(Protocol):
         code: str,
         start_date: str = '2012-01-01',
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
-        resolution: Literal['day', 'week', 'month', 'year'] = 'day',
+        resolution: Literal['day'] = 'day',
         advanced: bool = True,
         ascending: bool = False
     ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
@@ -113,4 +115,44 @@ class AsyncIVistock24HMoneyStockSectionSearch(Protocol):
         letter: Union[Vistock24HMoneyLetterCategory, str] = 'all',
         limit: int = 2000 
     ) -> Standard24HMoneyStockSectionSearchResults:
+        ...
+
+class IVistockVietstockStockIndexSearch(Protocol):
+    def search(
+        self,
+        code: str,
+        resolution: Literal['1D'] = '1D',
+        start_date: str = '2000-01-01',
+        end_date: str = datetime.now().strftime('%Y-%m-%d'),
+        ascending: bool = False
+    ) -> StandardVietstockStockIndexSearchResults:
+        ...
+
+class AsyncIVistockVietstockStockIndexSearch(Protocol):
+    async def async_search(
+        self,
+        code: str,
+        resolution: Literal['1D'] = '1D',
+        start_date: str = '2000-01-01',
+        end_date: str = datetime.now().strftime('%Y-%m-%d'),
+        ascending: bool = False
+    ) -> StandardVietstockStockIndexSearchResults:
+        ...
+
+class IVistockDNSEStockIndexSearch(Protocol):
+    def search(
+        self,
+        code: str,
+        current_datetime: str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z',
+        ascending: bool = False
+    ) -> StandardDNSEStockIndexSearchResults:
+        ...
+
+class AsyncIVistockDNSEStockIndexSearch(Protocol):
+    async def async_search(
+        self,
+        code: str,
+        current_datetime: str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z',
+        ascending: bool = False
+    ) -> StandardDNSEStockIndexSearchResults:
         ...

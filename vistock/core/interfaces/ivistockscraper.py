@@ -39,3 +39,19 @@ class IVistock24HMoneyStockSectionScraper:
 class AsyncIVistock24HMoneyStockSectionScraper:
     async def async_fetch(self, url: str) -> Dict[str, Any]:
         ...
+
+class IVistockVietstockStockIndexScraper:
+    def fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
+class AsyncIVistockVietstockStockIndexScraper:
+    async def async_fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
+class IVistockDNSEStockIndexScraper:
+    def fetch(self, url: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        ...
+
+class AsyncIVistockDNSEStockIndexScraper:
+    async def async_fetch(self, url: str, payload: Dict[str, Any]) -> Dict[str, Any]:
+        ...

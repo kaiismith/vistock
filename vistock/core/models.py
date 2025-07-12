@@ -1,7 +1,7 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
-class StandardVnDirectStockIndex(BaseModel):
+class StandardVnDirectStockIndexSearch(BaseModel):
     code: str
     date: str
     time: str
@@ -17,8 +17,8 @@ class StandardVnDirectStockIndex(BaseModel):
     def __repr__(self):
         return super().__repr__()
 
-class AdvancedVnDirectStockIndex(BaseModel):
-    standard: StandardVnDirectStockIndex
+class AdvancedVnDirectStockIndexSearch(BaseModel):
+    standard: StandardVnDirectStockIndexSearch
     basic: float
     ceiling: float
     floor: float
@@ -38,7 +38,7 @@ class AdvancedVnDirectStockIndex(BaseModel):
         return super().__repr__()
 
 class StandardVnDirectStockIndexSearchResults(BaseModel):
-    results: List[StandardVnDirectStockIndex]
+    results: List[StandardVnDirectStockIndexSearch]
     total_results: int
 
     def __str__(self):
@@ -46,7 +46,7 @@ class StandardVnDirectStockIndexSearchResults(BaseModel):
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
 
 class AdvancedVnDirectStockIndexSearchResults(BaseModel):
-    results: List[AdvancedVnDirectStockIndex]
+    results: List[AdvancedVnDirectStockIndexSearch]
     total_results: int
 
     def __str__(self):
@@ -73,7 +73,7 @@ class StandardVnDirectFundamentalIndexSearchResults(BaseModel):
         fields = ', '.join(f"{k}={v!r}" for k, v in self.model_dump().items())
         return f'{self.__class__.__name__}({fields})'
     
-class StandardVnDirectFinancialModel(BaseModel):
+class StandardVnDirectFinancialModelSearch(BaseModel):
     model_type: int
     model_type_name: str
     model_vn_desc: str
@@ -91,7 +91,7 @@ class StandardVnDirectFinancialModel(BaseModel):
         return super().__repr__()
 
 class StandardVnDirectFinancialModelSearchResults(BaseModel):
-    results: List[StandardVnDirectFinancialModel]
+    results: List[StandardVnDirectFinancialModelSearch]
     total_results: int
 
     def __str__(self):
@@ -100,7 +100,7 @@ class StandardVnDirectFinancialModelSearchResults(BaseModel):
     
 class StandardVnDirectFinancialStatementsIndex(BaseModel):
     code: str
-    model: StandardVnDirectFinancialModel
+    model: StandardVnDirectFinancialModelSearch
     report_type: str
     numeric_value: int
     fiscal_date: str
@@ -122,10 +122,10 @@ class Standard24HMoneyStockSection(BaseModel):
     code: str
     company_name: str
     tfloor: str
-    company_type: str
-    icb_name_vi: str
-    icb_name_en: str
-    listed_share_vol: int
+    company_type: Optional[str] = ''
+    icb_name_vi: Optional[str] = ''
+    icb_name_en: Optional[str] = ''
+    listed_share_vol: Optional[int] = 0
     fiingroup_icb_code: int
 
     def __repr__(self):
@@ -133,6 +133,43 @@ class Standard24HMoneyStockSection(BaseModel):
 
 class Standard24HMoneyStockSectionSearchResults(BaseModel):
     results: List[Standard24HMoneyStockSection]
+    total_results: int
+
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
+    
+class StandardVietstockStockIndexSearch(BaseModel):
+    mopen: float
+    mhigh: float
+    mlow: float
+    mclose: float
+    mvolume: int
+    timestamp: str
+
+    def __repr__(self):
+        return super().__repr__()
+
+class StandardVietstockStockIndexSearchResults(BaseModel):
+    results: List[StandardVietstockStockIndexSearch]
+    total_results: int
+
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
+    
+class StandardDNSEStockIndexSearch(BaseModel):
+    code: str
+    match_price: float
+    match_volume: int
+    sending_time: str
+    side: int
+
+    def __repr__(self):
+        return super().__repr__()
+
+class StandardDNSEStockIndexSearchResults(BaseModel):
+    results: List[StandardDNSEStockIndexSearch]
     total_results: int
 
     def __str__(self):

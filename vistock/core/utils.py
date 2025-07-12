@@ -2,14 +2,20 @@ from vistock.core.enums import Vistock24HMoneySectionMapping
 from typing import List, Dict, Union, Any, Type
 from urllib.parse import urlparse
 from datetime import datetime
+from tzlocal import get_localzone
 from enum import Enum
+import pytz
+import time
 
 class VistockValidator:
-    STOCK_INDEX_REQUIRED_FIELDS = {
+    VNDIRECT_STOCK_INDEX_REQUIRED_FIELDS = {
         'code', 'date', 'time', 'floor', 'type', 'basicPrice', 'ceilingPrice',
         'floorPrice', 'open', 'high', 'low', 'close', 'average', 'adOpen',
         'adHigh', 'adLow', 'adClose', 'adAverage', 'nmVolume', 'nmValue',
         'ptVolume', 'ptValue', 'change', 'adChange', 'pctChange'
+    }
+    DNSE_STOCK_INDEX_REQUIRED_FIELDS = {
+        'symbol', 'matchPrice', 'matchQtty', 'sendingTime', 'side'
     }
 
     @staticmethod
@@ -54,14 +60,28 @@ class VistockValidator:
         return start_dt <= end_dt
     
     @staticmethod
-    def validate_resolution(resolution: str) -> bool:
-        valid_resolutions = {'day', 'week', 'month', 'year'}
+    def validate_vndirect_resolution(resolution: str) -> bool:
+        valid_resolutions = {'day'}
         return resolution in valid_resolutions if resolution else True
     
     @staticmethod
-    def validate_stock_index_json_data(data: List[Dict[str, Any]]) -> bool:        
+    def validate_vietstock_resolution(resolution: str) -> bool:
+        valid_resolutions = {'1D'}
+        return resolution in valid_resolutions if resolution else True
+    
+    @staticmethod
+    def validate_vndirect_stock_index_json_data(data: List[Dict[str, Any]]) -> bool:        
         for entry in data:            
-            missing_fields = VistockValidator.STOCK_INDEX_REQUIRED_FIELDS - entry.keys()
+            missing_fields = VistockValidator.VNDIRECT_STOCK_INDEX_REQUIRED_FIELDS - entry.keys()
+            if missing_fields:
+                return False
+            
+        return True
+    
+    @staticmethod
+    def validate_dnse_stock_index_json_data(data: List[Dict[str, Any]]) -> bool:
+        for entry in data:
+            missing_fields = VistockValidator.DNSE_STOCK_INDEX_REQUIRED_FIELDS - entry.keys()
             if missing_fields:
                 return False
             
@@ -132,5 +152,39 @@ class VistockGenerator:
                 dates.append(f'{year}-{q}')
 
         return ','.join(dates)
+    
+class VistockConverter:
+    @staticmethod
+    def convert_utc_to_local(utc_time: str) -> str:
+        try:
+            utc_time_clean = utc_time.rstrip('Z')
+
+            if '.' in utc_time_clean:
+                date_part, ms_part = utc_time_clean.split('.')
+                ms_part = (ms_part + '000000')[:6]  # pad to microseconds
+                utc_time_clean = f'{date_part}.{ms_part}'
+                fmt = '%Y-%m-%dT%H:%M:%S.%f'
+            else:
+                fmt = '%Y-%m-%dT%H:%M:%S'
+
+            utc_dt = datetime.strptime(utc_time_clean, fmt)
+            utc_dt = utc_dt.replace(tzinfo=pytz.utc)
+
+            local_tz = get_localzone()
+            local_dt = utc_dt.astimezone(local_tz)
+
+            return local_dt.strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        
+        except Exception:
+            return utc_time
+        
+    @staticmethod
+    def convert_date_to_timestamp(date: str) -> int:
+        dt = datetime.strptime(date, '%Y-%m-%d')
+        return int(time.mktime(dt.timetuple()))
+    
+    @staticmethod
+    def convert_timestamp_to_date(timestamp: int) -> str:
+        return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
 
         

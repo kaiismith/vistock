@@ -4,8 +4,8 @@ from vistock.core.enums import (
     Vistock24HMoneyCompanyCategory,
     Vistock24HMoneyLetterCategory
 )
-from typing import List, Union, Protocol
-from datetime import datetime
+from typing import List, Dict, Union, Any, Protocol
+from datetime import datetime, timezone
 
 class IViStockVnDirectStockIndexParser(Protocol):
     def parse_url_path(
@@ -54,4 +54,22 @@ class IVistock24HMoneyStockSectionParser(Protocol):
         letter_code: Union[Vistock24HMoneyLetterCategory, str] = 'all',
         limit: int = 2000
     ) -> str:
+        ...
+
+class IVistockVietstockStockIndexParser(Protocol):
+    def parse_url_path(
+        self,
+        code: str,
+        resolution: str,
+        start_date: str = '2000-01-01',
+        end_date: str = datetime.now().strftime('%Y-%m-%d')
+    ) -> str:
+        ...
+
+class IVistockDNSEStockIndexParser(Protocol):
+    def parse_payload(
+        self,
+        code: str,
+        current_datetime: str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
+    ) -> Dict[str, Any]:
         ...

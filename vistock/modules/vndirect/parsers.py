@@ -42,11 +42,17 @@ class VistockVnDirectStockIndexParser(IViStockVnDirectStockIndexParser):
                 'Invalid date range: "start_date" must be earlier than "end_date". Please ensure that the start date precedes the end date to maintain a valid chronological order.'
             )
 
-        if VistockValidator.validate_date_format(date_str=start_date):
-            query_parts.append(f'date:gte:{start_date}')
-            
-        if VistockValidator.validate_date_format(date_str=end_date):
-            query_parts.append(f'date:lte:{end_date}')
+        if not VistockValidator.validate_date_format(date_str=start_date):
+            raise ValueError(
+                f'Invalid start_date format: "{start_date}". Please use "YYYY-MM-DD".'
+            )
+        query_parts.append(f'date:gte:{start_date}')
+
+        if not VistockValidator.validate_date_format(date_str=end_date):
+            raise ValueError(
+                f'Invalid end_date format: "{end_date}". Please use "YYYY-MM-DD".'
+            )
+        query_parts.append(f'date:lte:{end_date}')
 
         q_param = '~'.join(query_parts)
 
