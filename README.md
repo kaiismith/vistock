@@ -17,6 +17,8 @@ Please be respectful of the websites you interact with. Always use appropriate r
 - **Vndirect**
 - **Vietstock**
 - **24hmoney**
+- **DNSE**
+- **SSC**
 - *more coming soon...*
 
 ## Installation

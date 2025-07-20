@@ -28,5 +28,6 @@ tomli
 typing-inspection
 typing_extensions
 tzdata
+tzlocal
 urllib3
 wheel

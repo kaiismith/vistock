@@ -32,6 +32,22 @@ class AsyncIVistockVnDirectFinancialStatementsIndexScraper:
     async def async_fetch(self, url: str) -> Dict[str, Any]:
         ...
 
+class IVistockVnDirectMarketPricesScraper:
+    def fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
+class AsyncIVistockVnDirectMarketPricesScraper:
+    async def async_fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
+class IVistockVnDirectChangePricesScraper:
+    def fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
+class AsyncIVistockVnDirectChangePricesScraper:
+    async def async_fetch(self, url: str) -> Dict[str, Any]:
+        ...
+
 class IVistock24HMoneyStockSectionScraper:
     def fetch(self, url: str) -> Dict[str, Any]:
         ...

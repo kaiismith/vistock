@@ -4,7 +4,9 @@ from .core.enums import (
     Vistock24HMoneyCompanyCategory,
     Vistock24HMoneyLetterCategory,
     VistockVnDirectFinancialModelsCategory,
-    VistockVnDirectReportTypeCategory
+    VistockVnDirectReportTypeCategory,
+    VistockVnDirectIndexCodeMapping,
+    VistockVnDirectChangePricePeriodMapping
 )
 
 __all__ = [
@@ -13,5 +15,7 @@ __all__ = [
     'Vistock24HMoneyCompanyCategory',
     'Vistock24HMoneyLetterCategory',
     'VistockVnDirectFinancialModelsCategory',
-    'VistockVnDirectReportTypeCategory'
+    'VistockVnDirectReportTypeCategory',
+    'VistockVnDirectIndexCodeMapping',
+    'VistockVnDirectChangePricePeriodMapping'
 ]

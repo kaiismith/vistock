@@ -45,6 +45,24 @@ class IVistockVnDirectFinancialStatementsIndexParser(Protocol):
     ) -> List[str]:
         ...
 
+class IVistockVnDirectMarketPricesParser(Protocol):
+    def parse_url_path(
+        self,
+        code: str,
+        start_date: str = '2012-01-01',
+        ascending: bool = True,
+        limit: int = 1
+    ) -> str:
+        ...
+
+class IVistockVnDirectChangePricesParser(Protocol):
+    def parse_url_path(
+        self,
+        code: str,
+        period: str
+    ) -> str:
+        ...
+
 class IVistock24HMoneyStockSectionParser(Protocol):
     def parse_url_path(
         self,

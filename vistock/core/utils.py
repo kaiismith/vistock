@@ -17,6 +17,12 @@ class VistockValidator:
     DNSE_STOCK_INDEX_REQUIRED_FIELDS = {
         'symbol', 'matchPrice', 'matchQtty', 'sendingTime', 'side'
     }
+    VNDIRECT_INDEX_CODES = {
+        'VNINDEX', 'HNX', 'UPCOM', 'VN30', 'VN30F1M'
+    }
+    VNDIRECT_INDEX_PERIODS = {
+        '1D', 'MTD', 'QTD', 'YTD', '5D', '1M', '3M', '6M', '1Y'
+    }
 
     @staticmethod
     def validate_url(url: str) -> bool:
@@ -102,10 +108,26 @@ class VistockValidator:
         if isinstance(value, str):
             if value.upper() in enum_cls.__members__:
                 return True
+            
             if any(member.value == value for member in enum_cls):
                 return True
 
         return False
+    
+    @staticmethod
+    def validate_year_range(start_year: int, end_year: int) -> bool:
+        if start_year > end_year:
+            return False
+        
+        return True
+    
+    @staticmethod
+    def validate_index_code(code: str) -> bool:
+        return code in VistockValidator.VNDIRECT_INDEX_CODES if code else True
+    
+    @staticmethod
+    def validate_index_period(period: str) -> bool:
+        return period in VistockValidator.VNDIRECT_INDEX_PERIODS if period else True
 
 class VistockNormalizator:
     @staticmethod

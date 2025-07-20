@@ -6,7 +6,9 @@ from vistock.core.models import (
     StandardVnDirectFinancialModelSearchResults,
     StandardVnDirectFinancialStatementsIndexSearchResults,
     StandardDNSEStockIndexSearchResults,
-    StandardVietstockStockIndexSearchResults
+    StandardVietstockStockIndexSearchResults,
+    StandardVnDirectMarketPricesSearchResults,
+    StandardVnDirectChangePricesSearchResults
 )
 from vistock.core.enums import (
     Vistock24HMoneyIndustryCategory,
@@ -14,7 +16,9 @@ from vistock.core.enums import (
     Vistock24HMoneyCompanyCategory,
     Vistock24HMoneyLetterCategory,
     VistockVnDirectFinancialModelsCategory,
-    VistockVnDirectReportTypeCategory
+    VistockVnDirectReportTypeCategory,
+    VistockVnDirectIndexCodeMapping,
+    VistockVnDirectChangePricePeriodMapping
 )
 from typing import Union, Protocol, Literal
 from datetime import datetime, timezone
@@ -93,6 +97,40 @@ class AsyncIVistockVnDirectFinancialStatementsIndexSearch(Protocol):
         report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
         model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
     ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
+        ...
+
+class IVistockVnDirectMarketPricesSearch(Protocol):
+    def search(
+        self,
+        code: Union[VistockVnDirectIndexCodeMapping, str],
+        start_date: str = '2012-01-01',
+        ascending: bool = True
+    ) -> StandardVnDirectMarketPricesSearchResults:
+        ...
+
+class AsyncIVistockVnDirectMarketPricesSearch(Protocol):
+    async def async_search(
+        self,
+        code: Union[VistockVnDirectIndexCodeMapping, str],
+        start_date: str = '2012-01-01',
+        ascending: bool = True
+    ) -> StandardVnDirectMarketPricesSearchResults:
+        ...
+
+class IVistockVnDirectChangePricesSearch(Protocol):
+    def search(
+        self,
+        code: Union[VistockVnDirectIndexCodeMapping, str] = 'VNINDEX,HNX,UPCOM,VN30,VN30F1M',
+        period: Union[VistockVnDirectChangePricePeriodMapping, str] = '1D'
+    ) -> StandardVnDirectChangePricesSearchResults:
+        ...
+
+class AsyncIVistockVnDirectChangePricesSearch(Protocol):
+    async def async_search(
+        self,
+        code: Union[VistockVnDirectIndexCodeMapping, str] = 'VNINDEX,HNX,UPCOM,VN30,VN30F1M',
+        period: Union[VistockVnDirectChangePricePeriodMapping, str] = '1D'
+    ) -> StandardVnDirectChangePricesSearchResults:
         ...
 
 class IVistock24HMoneyStockSectionSearch(Protocol):

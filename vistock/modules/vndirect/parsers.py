@@ -2,7 +2,9 @@ from vistock.core.interfaces.ivistockparser import (
     IViStockVnDirectStockIndexParser,
     IVistockVnDirectFundamentalIndexParser,
     IVistockVnDirectFinancialModelsParser,
-    IVistockVnDirectFinancialStatementsIndexParser
+    IVistockVnDirectFinancialStatementsIndexParser,
+    IVistockVnDirectMarketPricesParser,
+    IVistockVnDirectChangePricesParser
 )
 from vistock.core.constants import DEFAULT_VNDIRECT_DOMAIN
 from vistock.core.enums import VistockVnDirectFinancialModelsCategory
@@ -141,10 +143,23 @@ class VistockVnDirectFinancialStatementsIndexParser(IVistockVnDirectFinancialSta
                 'Invalid code: "code" must be a non-empty alphanumeric string with exactly 3 characters representing the stock code. Please ensure that the code is specified correctly.'
             )
         
+        if not VistockValidator.validate_year_range(start_year=start_year, end_year=end_year):
+            raise ValueError(
+                'Invalid year range: "start_year" must be earlier than or equal to "end_year". Please ensure that the start year precedes or is equal to the end year to maintain a valid chronological order.'
+            )
+        
+        if limit < 0:
+            raise ValueError(
+                'Invalid limit: "limit" must be a positive integer greater than zero to ensure proper pagination and data retrieval.'
+            )
+        
+        if limit == 0:
+            limit += 1
+        
+        fiscal_date = VistockGenerator.generate_annual_dates(start_year=start_year, end_year=end_year)
+        
         if report_type_code == 'QUARTER':
             fiscal_date = VistockGenerator.generate_quarterly_dates(start_year=start_year, end_year=end_year)
-
-        fiscal_date = VistockGenerator.generate_annual_dates(start_year=start_year, end_year=end_year)
 
         urls: List[str] = []
 
@@ -174,3 +189,60 @@ class VistockVnDirectFinancialStatementsIndexParser(IVistockVnDirectFinancialSta
             urls.append(f'{url}')
 
             return urls
+
+class VistockVnDirectMarketPricesParser(IVistockVnDirectMarketPricesParser):
+    def __init__(self):
+        self.domain = DEFAULT_VNDIRECT_DOMAIN
+        self._url_template = '?sort=date:{order}&size={limit}&q=code:{code}~date:gte:{start_date}'
+
+    def parse_url_path(
+        self,
+        code: str,
+        start_date: str = '2012-01-01',
+        ascending: bool = True,
+        limit: int = 1
+    ) -> str:
+        if not VistockValidator.validate_index_code(code=code):
+            raise ValueError(
+                f'Invalid index code: "{code}". Must be one of the supported codes: VNINDEX, HNX, UPCOM, VN30, VN30F1M.'
+            )
+        
+        if not VistockValidator.validate_date_format(date_str=start_date):
+            raise ValueError(
+                f'Invalid start_date format: "{start_date}". Please use "YYYY-MM-DD".'
+            )
+        
+        if limit < 0:
+            raise ValueError(
+                'Invalid limit: "limit" must be a positive integer greater than zero to ensure proper pagination and data retrieval.'
+            )
+        
+        if limit == 0:
+            limit += 1
+
+        if not ascending:
+            order = 'desc'
+
+        order = 'asc'
+
+        return self._url_template.format(
+            code=code,
+            start_date=start_date,
+            order=order,
+            limit=limit
+        )
+    
+class VistockVnDirectChangePricesParser(IVistockVnDirectChangePricesParser):
+    def __init__(self):
+        self._domain = DEFAULT_VNDIRECT_DOMAIN
+        self._url_template = '?q=code:{code}~period:{period}'
+
+    def parse_url_path(
+        self,
+        code: str,
+        period: str
+    ) -> str:
+        return self._url_template.format(
+            code=code,
+            period=period
+        )

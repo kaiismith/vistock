@@ -118,6 +118,65 @@ class StandardVnDirectFinancialStatementsIndexSearchResults(BaseModel):
         results_repr = ', '.join(repr(r) for r in self.results)
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
     
+class StandardVnDirectMarketPricesSearch(BaseModel):
+    code: str
+    date: str
+    time: str
+    tfloor: str
+    type: str
+    open: float
+    high: float
+    low: float
+    close: float
+    change: float
+    pct_change: float
+    accumulated_volume: float
+    accumulated_value: float
+    nmvolume: float
+    nmvalue: float
+    ptvolume: float
+    ptvalue: float
+    advances: float
+    declines: float
+    no_change: float
+    no_trade: float
+    ceiling_stocks: float
+    floor_stocks: float
+    val_chg_pct_cr1d: float
+    
+    def __repr__(self):
+        return super().__repr__()
+
+class StandardVnDirectMarketPricesSearchResults(BaseModel):
+    results: List[StandardVnDirectMarketPricesSearch]
+    total_results: int
+
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
+        
+class StandardVnDirectChangePricesSearch(BaseModel):
+    code: str
+    name: str
+    type: str
+    period: str
+    price: float
+    bop_price: float
+    change: float
+    pct_change: float
+    last_updated: str
+
+    def __repr__(self):
+        return super().__repr__()
+    
+class StandardVnDirectChangePricesSearchResults(BaseModel):
+    results: List[StandardVnDirectChangePricesSearch]
+    total_results: int
+
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
+    
 class Standard24HMoneyStockSection(BaseModel):
     code: str
     company_name: str
