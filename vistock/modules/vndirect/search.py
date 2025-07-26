@@ -129,9 +129,42 @@ class VistockVnDirectStockIndexSearch(IVistockVnDirectStockIndexSearch, AsyncIVi
         data.sort(key=lambda x: x.get('date', ''), reverse=not ascending)
 
         if advanced:
+            transformed_data: List[Dict[str, Any]] = [
+                {
+                    'standard': {
+                        'code': item.get('code', ''),
+                        'date': item.get('date', ''),
+                        'time': item.get('time', ''),
+                        'tfloor': item.get('floor', ''),
+                        'type': item.get('type', ''),
+                        'mopen': item.get('adOpen', 0.0),
+                        'mhigh': item.get('adHigh', 0.0),
+                        'mlow': item.get('adLow', 0.0),
+                        'mclose': item.get('adClose', 0.0),
+                        'maverage': item.get('adAverage', 0.0),
+                        'nmvolume': int(item.get('nmVolume', 0))
+                    },
+                    'basic': item.get('basicPrice', 0.0),
+                    'ceiling': item.get('ceilingPrice', 0.0),
+                    'floor': item.get('floorPrice', 0.0),
+                    'open': item.get('open', 0.0),
+                    'high': item.get('high', 0.0),
+                    'low': item.get('low', 0.0),
+                    'close': item.get('close', 0.0),
+                    'average': item.get('average', 0.0),
+                    'nmvalue': item.get('nmValue', 0.0),
+                    'ptvolume': item.get('ptVolume', 0.0),
+                    'ptvalue': item.get('ptValue', 0.0),
+                    'change': item.get('change', 0.0),
+                    'mchange': item.get('adChange', 0.0),
+                    'pctchange': item.get('pctChange', 0.0)
+                }
+                for item in data
+            ]
+
             return AdvancedVnDirectStockIndexSearchResults(
-                results=[AdvancedVnDirectStockIndexSearch(**item) for item in data],
-                total_results=len(data)
+                results=[AdvancedVnDirectStockIndexSearch(**item) for item in transformed_data],
+                total_results=len(transformed_data)
             )
 
         return StandardVnDirectStockIndexSearchResults(
@@ -188,9 +221,42 @@ class VistockVnDirectStockIndexSearch(IVistockVnDirectStockIndexSearch, AsyncIVi
         data.sort(key=lambda x: x.get('date', ''), reverse=not ascending)
 
         if advanced:
+            transformed_data: List[Dict[str, Any]] = [
+                {
+                    'standard': {
+                        'code': item.get('code', ''),
+                        'date': item.get('date', ''),
+                        'time': item.get('time', ''),
+                        'tfloor': item.get('floor', ''),
+                        'type': item.get('type', ''),
+                        'mopen': item.get('adOpen', 0.0),
+                        'mhigh': item.get('adHigh', 0.0),
+                        'mlow': item.get('adLow', 0.0),
+                        'mclose': item.get('adClose', 0.0),
+                        'maverage': item.get('adAverage', 0.0),
+                        'nmvolume': int(item.get('nmVolume', 0))
+                    },
+                    'basic': item.get('basicPrice', 0.0),
+                    'ceiling': item.get('ceilingPrice', 0.0),
+                    'floor': item.get('floorPrice', 0.0),
+                    'open': item.get('open', 0.0),
+                    'high': item.get('high', 0.0),
+                    'low': item.get('low', 0.0),
+                    'close': item.get('close', 0.0),
+                    'average': item.get('average', 0.0),
+                    'nmvalue': item.get('nmValue', 0.0),
+                    'ptvolume': item.get('ptVolume', 0.0),
+                    'ptvalue': item.get('ptValue', 0.0),
+                    'change': item.get('change', 0.0),
+                    'mchange': item.get('adChange', 0.0),
+                    'pctchange': item.get('pctChange', 0.0)
+                }
+                for item in data
+            ]
+
             return AdvancedVnDirectStockIndexSearchResults(
-                results=[AdvancedVnDirectStockIndexSearch(**item) for item in data],
-                total_results=len(data)
+                results=[AdvancedVnDirectStockIndexSearch(**item) for item in transformed_data],
+                total_results=len(transformed_data)
             )
 
         return StandardVnDirectStockIndexSearchResults(
