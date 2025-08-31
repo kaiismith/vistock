@@ -1,4 +1,5 @@
 DEFAULT_VNDIRECT_DOMAIN = 'vndirect.com.vn'
+DEFAULT_VNDIRECT_CHART_STOCK_INDEX_BASE_URL = 'https://dchart-api.vndirect.com.vn/dchart/history'
 DEFAULT_VNDIRECT_STOCK_INDEX_BASE_URL = 'https://api-finfo.vndirect.com.vn/v4/stock_prices'
 DEFAULT_VNDIRECT_FUNDAMENTAL_INDEX_BASE_URL = 'https://api-finfo.vndirect.com.vn/v4/ratios/latest'
 DEFAULT_VNDIRECT_FINANCIAL_MODELS_BASE_URL = 'https://api-finfo.vndirect.com.vn/v4/financial_models'
@@ -11,6 +12,13 @@ DEFAULT_VNDIRECT_HEADERS = {
     'Origin': 'https://dstock.vndirect.com.vn',
     'Referer': 'https://dstock.vndirect.com.vn/'
 }
+DEFAULT_VNDIRECT_STOCK_INDEX_START_DATE = '2012-01-01'
+DEFAULT_VNDIRECT_FINANCIAL_STATEMENTS_START_YEAR = 2000
+DEFAULT_VNDIRECT_MARKET_PRICES_START_DATE = '2012-01-01'
+DEFAULT_VNDIRECT_STOCK_INDEX_LIMIT = 50000
+DEFAULT_VNDIRECT_FINANCIAL_MODELS_LIMIT = 2000
+DEFAULT_VNDIRECT_FINANCIAL_STATEMENTS_LIMIT = 10000
+DEFAULT_VNDIRECT_MARKET_PRICES_LIMIT = 50000
 
 DEFAULT_24HMONEY_DOMAIN = '24hmoney.vn'
 DEFAULT_24HMONEY_BASE_URL = 'https://api-finance-t19.24hmoney.vn/v1/ios/company/az'
@@ -28,6 +36,7 @@ DEFAULT_24HMONEY_HEADERS = {
     'Sec-Fetch-Mode': 'cors',
     'Sec-Fetch-Site': 'same-site',
 }
+DEFAULT_24HMONEY_LIMIT = 5000
 
 DEFAULT_VIETSTOCK_DOMAIN = 'api.vietstock.vn'
 DEFAULT_VIETSTOCK_STOCK_INDEX_BASE_URL = 'https://api.vietstock.vn/tvnew/history'
@@ -47,11 +56,13 @@ DEFAULT_VIETSTOCK_STOCK_INDEX_HEADERS = {
     'Sec-Fetch-Site': 'same-site',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
 }
+DEFAULT_VIETSTOCK_STOCK_INDEX_START_DATE = '2000-01-01'
+DEFAULT_VIETSTOCK_STOCK_INDEX_RESOLUTION = '1D'
+
 DEFAULT_DNSE_DOMAIN = 'api.dnse.com.vn'
-DEFAULT_DNSE_STOCK_INDEX_BASE_URL = 'https://api.dnse.com.vn/price-api/query'
-DEFAULT_DNSE_STOCK_INDEX_HEADERS = {
+DEFAULT_DNSE_TRADING_INDEX_BASE_URL = 'https://api.dnse.com.vn/price-api/query'
+DEFAULT_DNSE_TRADING_INDEX_HEADERS = {
     "Accept": "*/*",
-    "Accept-Encoding": "gzip, deflate, br, zstd",
     "Accept-Language": "vi,en-US;q=0.9,en;q=0.8",
     "Content-Type": "application/json",
     "Origin": "https://banggia.dnse.com.vn",

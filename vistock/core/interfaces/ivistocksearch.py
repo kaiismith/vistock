@@ -1,196 +1,183 @@
 from vistock.core.models import (
-    StandardVnDirectStockIndexSearchResults, 
-    AdvancedVnDirectStockIndexSearchResults,
-    StandardVnDirectFundamentalIndexSearchResults,
-    Standard24HMoneyStockSectionSearchResults,
-    StandardVnDirectFinancialModelSearchResults,
-    StandardVnDirectFinancialStatementsIndexSearchResults,
-    StandardDNSEStockIndexSearchResults,
-    StandardVietstockStockIndexSearchResults,
-    StandardVnDirectMarketPricesSearchResults,
-    StandardVnDirectChangePricesSearchResults
+    StandardStockIndexSearchResults,
+    AdvancedStockIndexSearchResults,
+    StandardFundamentalIndexSearchResults,
+    StandardFinancialModelsSearchResults,
+    StandardFinancialStatementsIndexSearchResults,
+    StandardMarketPricesSearchResults,
+    AdvancedMarketPricesSearchResults,
+    StandardChangePricesSearchResults,
+    StandardStockListingSearchResults,
+    StandardTradingIndexSearchResults
 )
 from vistock.core.enums import (
-    Vistock24HMoneyIndustryCategory,
-    Vistock24HMoneyFloorCategory,
-    Vistock24HMoneyCompanyCategory,
-    Vistock24HMoneyLetterCategory,
-    VistockVnDirectFinancialModelsCategory,
-    VistockVnDirectReportTypeCategory,
-    VistockVnDirectIndexCodeMapping,
-    VistockVnDirectChangePricePeriodMapping
+    VistockIndustryCategory,
+    VistockFloorCategory,
+    VistockCompanyTypeCategory,
+    VistockLetterCategory,
+    VistockFinancialModelsCategory,
+    VistockReportTypeCategory,
+    VistockIndexCode,
+    VistockPeriodCode,
+    VistockResolutionCode
 )
-from typing import Union, Protocol, Literal
+from typing import Union, Optional, Protocol
 from datetime import datetime, timezone
 
-class IVistockVnDirectStockIndexSearch(Protocol):
+class IVistockStockIndexSearch(Protocol):
     def search(
-        self, 
+        self,
         code: str,
-        start_date: str = '2012-01-01',
+        start_date: Optional[str] = None,
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
-        resolution: Literal['day'] = 'day',
+        period: Union[VistockPeriodCode, str] = VistockPeriodCode.ALL,
+        resolution: Union[VistockResolutionCode, str] = VistockResolutionCode.DAY,
         advanced: bool = True,
-        ascending: bool = False
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
+        ascending: bool = True
+    ) -> Union[StandardStockIndexSearchResults, AdvancedStockIndexSearchResults]:
         ...
 
-class AsyncIVistockVnDirectStockIndexSearch(Protocol):
+class AsyncIVistockStockIndexSearch(Protocol):
     async def async_search(
-        self, 
+        self,
         code: str,
-        start_date: str = '2012-01-01',
+        start_date: Optional[str] = None,
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
-        resolution: Literal['day'] = 'day',
+        period: Union[VistockPeriodCode, str] = VistockPeriodCode.ALL,
+        resolution: Union[VistockResolutionCode, str] = VistockResolutionCode.DAY,
         advanced: bool = True,
-        ascending: bool = False
-    ) -> Union[StandardVnDirectStockIndexSearchResults, AdvancedVnDirectStockIndexSearchResults]:
+        ascending: bool = True
+    ) -> Union[StandardStockIndexSearchResults, AdvancedStockIndexSearchResults]:
         ...
 
-class IVistockVnDirectFundamentalIndexSearch(Protocol):
+class IVistockFundamentalIndexSearch(Protocol):
     def search(
         self,
         code: str
-    ) -> StandardVnDirectFundamentalIndexSearchResults:
+    ) -> StandardFundamentalIndexSearchResults:
         ...
 
-class AsyncIVistockVnDirectFundamentalIndexSearch(Protocol):
+class AsyncIVistockFundamentalIndexSearch(Protocol):
     async def async_search(
         self,
         code: str
-    ) -> StandardVnDirectFundamentalIndexSearchResults:
+    ) -> StandardFundamentalIndexSearchResults:
         ...
 
-class IVistockVnDirectFinancialModelsSearch(Protocol):
+class IVistockFinancialModelsSearch(Protocol):
     def search(
         self,
         code: str,
-        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
-    ) -> StandardVnDirectFinancialModelSearchResults:
+        model: Union[VistockFinancialModelsCategory, str] = VistockFinancialModelsCategory.ALL
+    ) -> StandardFinancialModelsSearchResults:
         ...
 
-class AsyncIVistockVnDirectFinancialModelsSearch(Protocol):
+class AsyncIVistockFinancialModelsSearch(Protocol):
     async def async_search(
         self,
         code: str,
-        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
-    ) -> StandardVnDirectFinancialModelSearchResults:
+        model: Union[VistockFinancialModelsCategory, str] = VistockFinancialModelsCategory.ALL
+    ) -> StandardFinancialModelsSearchResults:
         ...
 
-class IVistockVnDirectFinancialStatementsIndexSearch(Protocol):
+class IVistockFinancialStatementsIndexSearch(Protocol):
     def search(
         self,
         code: str,
-        start_year: int = 2000,
+        start_year: Optional[int] = None,
         end_year: int = datetime.now().year,
-        report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
-        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
-    ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
+        report: Union[VistockReportTypeCategory, str] = VistockReportTypeCategory.ANNUAL,
+        model: Union[VistockFinancialModelsCategory, str] = VistockFinancialModelsCategory.ALL
+    ) -> StandardFinancialStatementsIndexSearchResults:
         ...
 
-class AsyncIVistockVnDirectFinancialStatementsIndexSearch(Protocol):
+class AsyncIVistockFinancialStatementsIndexSearch(Protocol):
     async def async_search(
         self,
         code: str,
-        start_year: int = 2000,
+        start_year: Optional[int] = None,
         end_year: int = datetime.now().year,
-        report_type: Union[VistockVnDirectReportTypeCategory, str] = 'ANNUAL',
-        model_type: Union[VistockVnDirectFinancialModelsCategory, str] = 'all'
-    ) -> StandardVnDirectFinancialStatementsIndexSearchResults:
+        report: Union[VistockReportTypeCategory, str] = VistockReportTypeCategory.ANNUAL,
+        model: Union[VistockFinancialModelsCategory, str] = VistockFinancialModelsCategory.ALL
+    ) -> StandardFinancialStatementsIndexSearchResults:
         ...
 
-class IVistockVnDirectMarketPricesSearch(Protocol):
+class IVistockMarketPricesSearch(Protocol):
     def search(
         self,
-        code: Union[VistockVnDirectIndexCodeMapping, str],
-        start_date: str = '2012-01-01',
-        ascending: bool = True
-    ) -> StandardVnDirectMarketPricesSearchResults:
-        ...
-
-class AsyncIVistockVnDirectMarketPricesSearch(Protocol):
-    async def async_search(
-        self,
-        code: Union[VistockVnDirectIndexCodeMapping, str],
-        start_date: str = '2012-01-01',
-        ascending: bool = True
-    ) -> StandardVnDirectMarketPricesSearchResults:
-        ...
-
-class IVistockVnDirectChangePricesSearch(Protocol):
-    def search(
-        self,
-        code: Union[VistockVnDirectIndexCodeMapping, str] = 'VNINDEX,HNX,UPCOM,VN30,VN30F1M',
-        period: Union[VistockVnDirectChangePricePeriodMapping, str] = '1D'
-    ) -> StandardVnDirectChangePricesSearchResults:
-        ...
-
-class AsyncIVistockVnDirectChangePricesSearch(Protocol):
-    async def async_search(
-        self,
-        code: Union[VistockVnDirectIndexCodeMapping, str] = 'VNINDEX,HNX,UPCOM,VN30,VN30F1M',
-        period: Union[VistockVnDirectChangePricePeriodMapping, str] = '1D'
-    ) -> StandardVnDirectChangePricesSearchResults:
-        ...
-
-class IVistock24HMoneyStockSectionSearch(Protocol):
-    def search(
-        self,
-        industry: Union[Vistock24HMoneyIndustryCategory, str] = 'all',
-        floor: Union[Vistock24HMoneyFloorCategory, str] = 'all',
-        company_type: Union[Vistock24HMoneyCompanyCategory, str] = 'all',
-        letter: Union[Vistock24HMoneyLetterCategory, str] = 'all',
-        limit: int = 2000
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-class AsyncIVistock24HMoneyStockSectionSearch(Protocol):
-    async def async_search(
-        self,
-        industry: Union[Vistock24HMoneyIndustryCategory, str] = 'all',
-        floor: Union[Vistock24HMoneyFloorCategory, str] = 'all',
-        company_type: Union[Vistock24HMoneyCompanyCategory, str] = 'all',
-        letter: Union[Vistock24HMoneyLetterCategory, str] = 'all',
-        limit: int = 2000 
-    ) -> Standard24HMoneyStockSectionSearchResults:
-        ...
-
-class IVistockVietstockStockIndexSearch(Protocol):
-    def search(
-        self,
-        code: str,
-        resolution: Literal['1D'] = '1D',
-        start_date: str = '2000-01-01',
+        code: Union[VistockIndexCode, str] = VistockIndexCode.ALL,
+        start_date: Optional[str] = None,
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
-        ascending: bool = False
-    ) -> StandardVietstockStockIndexSearchResults:
+        period: Union[VistockPeriodCode, str] = VistockPeriodCode.ALL,
+        resolution: Union[VistockResolutionCode, str] = VistockResolutionCode.DAY,
+        advanced: bool = True,
+        ascending: bool = True
+    ) -> Union[StandardMarketPricesSearchResults, AdvancedMarketPricesSearchResults]:
         ...
 
-class AsyncIVistockVietstockStockIndexSearch(Protocol):
+class AsyncIVistockMarketPricesSearch(Protocol):
     async def async_search(
         self,
-        code: str,
-        resolution: Literal['1D'] = '1D',
-        start_date: str = '2000-01-01',
+        code: Union[VistockIndexCode, str] = VistockIndexCode.ALL,
+        start_date: Optional[str] = None,
         end_date: str = datetime.now().strftime('%Y-%m-%d'),
-        ascending: bool = False
-    ) -> StandardVietstockStockIndexSearchResults:
+        period: Union[VistockPeriodCode, str] = VistockPeriodCode.ALL,
+        resolution: Union[VistockResolutionCode, str] = VistockResolutionCode.DAY,
+        advanced: bool = True,
+        ascending: bool = True
+    ) -> Union[StandardMarketPricesSearchResults, AdvancedMarketPricesSearchResults]:
         ...
 
-class IVistockDNSEStockIndexSearch(Protocol):
+class IVistockChangePricesSearch(Protocol):
+    def search(
+        self,
+        code: Union[VistockIndexCode, str] = VistockIndexCode.ALL,
+        period: Union[VistockPeriodCode, str] = VistockPeriodCode.ALL
+    ) -> StandardChangePricesSearchResults:
+        ...
+
+class AsyncIVistockChangePricesSearch(Protocol):
+    async def async_search(
+        self,
+        code: Union[VistockIndexCode, str] = VistockIndexCode.ALL,
+        period: Union[VistockPeriodCode, str] = VistockPeriodCode.ALL
+    ) -> StandardChangePricesSearchResults:
+        ...
+
+class IVistockStockListingSearch(Protocol):
+    def search(
+        self,
+        industry: Union[VistockIndustryCategory, str] = VistockIndustryCategory.ALL,
+        floor: Union[VistockFloorCategory, str] = VistockFloorCategory.ALL,
+        company_type: Union[VistockCompanyTypeCategory, str] = VistockCompanyTypeCategory.ALL,
+        letter: Union[VistockLetterCategory, str] = VistockLetterCategory.ALL
+    ) -> StandardStockListingSearchResults:
+        ...
+
+class AsyncIVistockStockListingSearch(Protocol):
+    async def async_search(
+        self,
+        industry: Union[VistockIndustryCategory, str] = VistockIndustryCategory.ALL,
+        floor: Union[VistockFloorCategory, str] = VistockFloorCategory.ALL,
+        company_type: Union[VistockCompanyTypeCategory, str] = VistockCompanyTypeCategory.ALL,
+        letter: Union[VistockLetterCategory, str] = VistockLetterCategory.ALL
+    ) -> StandardStockListingSearchResults:
+        ...
+
+class IVistockTradingIndexSearch(Protocol):
     def search(
         self,
         code: str,
         current_datetime: str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z',
         ascending: bool = False
-    ) -> StandardDNSEStockIndexSearchResults:
+    ) -> StandardTradingIndexSearchResults:
         ...
 
-class AsyncIVistockDNSEStockIndexSearch(Protocol):
+class AsyncIVistockTradingIndexSearch(Protocol):
     async def async_search(
         self,
         code: str,
         current_datetime: str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z',
         ascending: bool = False
-    ) -> StandardDNSEStockIndexSearchResults:
+    ) -> StandardTradingIndexSearchResults:
         ...

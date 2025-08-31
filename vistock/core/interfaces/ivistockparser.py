@@ -1,93 +1,173 @@
 from vistock.core.enums import (
-    Vistock24HMoneyIndustryCategory,
-    Vistock24HMoneyFloorCategory,
-    Vistock24HMoneyCompanyCategory,
-    Vistock24HMoneyLetterCategory
+    VistockIndexCode,
+    VistockPeriodCode,
+    VistockResolutionCode,
+    VistockIndustryCategory,
+    VistockFloorCategory,
+    VistockCompanyTypeCategory,
+    VistockLetterCategory,
+    VistockFinancialModelsCategory,
+    VistockReportTypeCategory
 )
-from typing import List, Dict, Union, Any, Protocol
+from vistock.core.models import (
+    StandardStockIndexSearchResults,
+    AdvancedStockIndexSearchResults,
+    StandardFundamentalIndexSearchResults,
+    StandardFinancialModelsSearchResults,
+    StandardFinancialStatementsIndexSearchResults,
+    StandardMarketPricesSearchResults,
+    AdvancedMarketPricesSearchResults,
+    StandardChangePricesSearchResults,
+    StandardStockListingSearchResults,
+    StandardTradingIndexSearchResults
+)
+from typing import List, Dict, Union, Any, Optional, Protocol
 from datetime import datetime, timezone
 
-class IViStockVnDirectStockIndexParser(Protocol):
-    def parse_url_path(
+class IVistockStockIndexParser(Protocol):
+    def to_query(
         self,
         code: str,
-        start_date: str = '2012-01-01',
-        end_date: str = datetime.now().strftime('%Y-%m-%d'),
-        limit: int = 1
+        start_date: Optional[str] = None,
+        end_date: str = datetime.now().strftime('%Y-%m-%d')
     ) -> str:
         ...
 
-class IVistockVnDirectFundamentalIndexParser(Protocol):
-    def parse_url_path(
+    def to_resolution(
+        self, 
+        data: List[Dict[str, Any]], 
+        resolution: Union[VistockResolutionCode, str] = VistockResolutionCode.DAY
+    ) -> List[Dict[str, Any]]:
+        ...
+
+    def to_standard(
+        self, 
+        data: List[Dict[str, Any]]
+    ) -> StandardStockIndexSearchResults:
+        ...
+
+    def to_advanced(
+        self, 
+        data: List[Dict[str, Any]]
+    ) -> AdvancedStockIndexSearchResults:
+        ...
+
+class IVistockFundamentalIndexParser(Protocol):
+    def to_query(
         self,
         code: str
     ) -> List[str]:
         ...
 
-class IVistockVnDirectFinancialModelsParser(Protocol):
-    def parse_url_path(
+    def to_standard(
+        self, 
+        code: str,
+        ratio: Dict[str, Any]
+    ) -> StandardFundamentalIndexSearchResults:
+        ...
+
+class IVistockFinancialModelsParser(Protocol):
+    def to_query(
         self,
         code: str,
-        model_type_code: str,
-        limit: int = 2000
+        model: Union[VistockFinancialModelsCategory, str] = VistockFinancialModelsCategory.ALL
     ) -> List[str]:
         ...
 
-class IVistockVnDirectFinancialStatementsIndexParser(Protocol):
-    def parse_url_path(
+    def to_standard(
         self,
         code: str,
-        start_year: int = 2000,
+        models: List[Dict[str, Any]]
+    ) -> StandardFinancialModelsSearchResults:
+        ...
+
+class IVistockFinancialStatementsIndexParser(Protocol):
+    def to_query(
+        self,
+        code: str,
+        start_year: Optional[int] = None,
         end_year: int = datetime.now().year,
-        report_type_code: str = 'ANNUAL',
-        model_type_code: str = 'all',
-        limit: int = 10000
+        report: Union[VistockReportTypeCategory, str] = VistockReportTypeCategory.ANNUAL,
+        model: Union[VistockFinancialModelsCategory, str] = VistockFinancialModelsCategory.ALL
     ) -> List[str]:
         ...
 
-class IVistockVnDirectMarketPricesParser(Protocol):
-    def parse_url_path(
+    def to_standard(
         self,
-        code: str,
-        start_date: str = '2012-01-01',
-        ascending: bool = True,
-        limit: int = 1
+        models: StandardFinancialModelsSearchResults,
+        statements: List[Dict[str, Any]]
+    ) -> StandardFinancialStatementsIndexSearchResults:
+        ...
+
+class IVistockMarketPricesParser(Protocol):
+    def to_query(
+        self,
+        code: Union[VistockIndexCode, str] = VistockIndexCode.ALL,
+        start_date: Optional[str] = None,
+        end_date: str = datetime.now().strftime('%Y-%m-%d'),
+        ascending: bool = True
+    ) -> List[str]:
+        ...
+
+    def to_resolution(
+        self, 
+        data: List[Dict[str, Any]], 
+        resolution: Union[VistockResolutionCode, str] = VistockResolutionCode.DAY
+    ) -> List[Dict[str, Any]]:
+        ...
+
+    def to_standard(
+        self,
+        prices: List[Dict[str, Any]]
+    ) -> StandardMarketPricesSearchResults:
+        ...
+
+    def to_advanced(
+        self,
+        prices: List[Dict[str, Any]]
+    ) -> AdvancedMarketPricesSearchResults:
+        ...
+
+class IVistockChangePricesParser(Protocol):
+    def to_query(
+        self,
+        code: Union[VistockIndexCode, str] = VistockIndexCode.ALL,
+        period: Union[VistockPeriodCode, str] = VistockPeriodCode.ALL
+    ) -> List[str]:
+        ...
+
+    def to_standard(
+        self,
+        prices: List[Dict[str, Any]]
+    ) -> StandardChangePricesSearchResults:
+        ...
+
+class IVistockStockListingParser(Protocol):
+    def to_query(
+        self,
+        industry: Union[VistockIndustryCategory, str] = VistockIndustryCategory.ALL,
+        floor: Union[VistockFloorCategory, str] = VistockFloorCategory.ALL,
+        company_type: Union[VistockCompanyTypeCategory, str] = VistockCompanyTypeCategory.ALL,
+        letter: Union[VistockLetterCategory, str] = VistockLetterCategory.ALL
     ) -> str:
         ...
 
-class IVistockVnDirectChangePricesParser(Protocol):
-    def parse_url_path(
+    def to_standard(
         self,
-        code: str,
-        period: str
-    ) -> str:
+        data: List[Dict[str, Any]]
+    ) -> StandardStockListingSearchResults:
         ...
 
-class IVistock24HMoneyStockSectionParser(Protocol):
-    def parse_url_path(
-        self,
-        industry_code: Union[Vistock24HMoneyIndustryCategory, str] = 'all',
-        floor_code: Union[Vistock24HMoneyFloorCategory, str] = 'all',
-        company_code: Union[Vistock24HMoneyCompanyCategory, str] = 'all',
-        letter_code: Union[Vistock24HMoneyLetterCategory, str] = 'all',
-        limit: int = 2000
-    ) -> str:
-        ...
-
-class IVistockVietstockStockIndexParser(Protocol):
-    def parse_url_path(
-        self,
-        code: str,
-        resolution: str,
-        start_date: str = '2000-01-01',
-        end_date: str = datetime.now().strftime('%Y-%m-%d')
-    ) -> str:
-        ...
-
-class IVistockDNSEStockIndexParser(Protocol):
-    def parse_payload(
+class IVistockTradingIndexParser(Protocol):
+    def to_payload(
         self,
         code: str,
         current_datetime: str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
     ) -> Dict[str, Any]:
+        ...
+
+    def to_standard(
+        self,
+        data: List[Dict[str, Any]]
+    ) -> StandardTradingIndexSearchResults:
         ...

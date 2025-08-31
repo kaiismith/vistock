@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Vistock24HMoneyIndustryCategory(Enum):
+class VistockIndustryCategory(Enum):
     OIL_AND_GAS = '0500'
     CHEMICALS = '1300'
     BASIC_RESOURCES = '1700'
@@ -14,29 +14,29 @@ class Vistock24HMoneyIndustryCategory(Enum):
     MEDIA = '5500'
     TRAVEL_AND_LEISURE = '5700'
     TELECOMMUNICATIONS = '6500'
-    ULTILITIES = '7500' # Electrticity, Water, Fuel & Gas
+    ULTILITIES = '7500'
     BANKS = '8300'
     INSURANCE = '8500'
     REAL_ESTATE = '8600'
     FINANCIAL_SERVICES = '8700'
     INFORMATION_TECHNOLOGY = '9500'
-    ALL = 'all'
+    ALL = 'ALL'
 
-class Vistock24HMoneyFloorCategory(Enum):
+class VistockFloorCategory(Enum):
     HOSE = 'HOSE'
     HNX = 'HNX'
     UPCOM = 'UPCOM'
-    ALL = 'all'
+    ALL = 'ALL'
 
-class Vistock24HMoneyCompanyCategory(Enum):
+class VistockCompanyTypeCategory(Enum):
     COMMON_TECHNOLOGY_SHARES = 'CT'
     BANKING = 'NH'
     INSURANCE = 'BH'
     SECURITIES = 'CK'
     INVESTMENT_FUND = 'FUND'
-    ALL = 'all'
+    ALL = 'ALL'
 
-class Vistock24HMoneyLetterCategory(Enum):
+class VistockLetterCategory(Enum):
     A = 'A'
     B = 'B'
     C = 'C'
@@ -63,9 +63,9 @@ class Vistock24HMoneyLetterCategory(Enum):
     X = 'X'
     Y = 'Y'
     Z = 'Z'
-    ALL = 'all'
+    ALL = 'ALL'
 
-class Vistock24HMoneySectionMapping(Enum):
+class VistockSector(Enum):
     APPAREL_RETAIL = 'Bán lẻ hàng may mặc'
     COMPLEX_RETAIL = 'Bán lẻ phức hợp'
     LIFE_INSURANCE = 'Bảo hiểm nhân thọ'
@@ -154,30 +154,39 @@ class Vistock24HMoneySectionMapping(Enum):
     DISPOSABLE_HOUSEHOLD_GOODS = 'Đồ gia dụng một lần'
     BEVERAGES_REFRESHMENTS = 'Đồ uống & giải khát'
 
-class VistockVnDirectFinancialModelsCategory(Enum):
+class VistockFinancialModelsCategory(Enum):
     BALANCE_SHEET = '1,89,101,411'
     INCOME_STATEMENT = '2,90,102,412'
     CASH_FLOW_STATEMENT = '3,91,103,413'
-    ALL = 'all'
+    ALL = 'ALL'
 
-class VistockVnDirectReportTypeCategory(Enum):
+class VistockReportTypeCategory(Enum):
     ANNUAL = 'ANNUAL'
     QUARTER = 'QUARTER'
 
-class VistockVnDirectIndexCodeMapping(Enum):
+class VistockIndexCode(Enum):
     VNINDEX = 'VNINDEX'
     HNX = 'HNX'
     UPCOM = 'UPCOM'
     VN30 = 'VN30'
     VN30F1M = 'VN30F1M'
+    ALL = 'ALL'
 
-class VistockVnDirectChangePricePeriodMapping(Enum):
+class VistockPeriodCode(Enum):
     ONE_DAY = '1D'
-    MONTH_TO_DATE = 'MTD'
-    QUARTER_TO_DATE = 'QTD'
-    YEAR_TO_DATE = 'YTD'
     ONE_WEEK = '5D'
     ONE_MONTH = '1M'
     THREE_MONTHS = '3M'
     SIX_MONTHS = '6M'
     ONE_YEAR = '1Y'
+    MONTH_TO_DATE = 'MTD'
+    QUARTER_TO_DATE = 'QTD'
+    YEAR_TO_DATE = 'YTD'
+    ALL = 'ALL'
+    
+class VistockResolutionCode(Enum):
+    TICK = 'T'
+    DAY = 'D'
+    WEEK = 'W'
+    MONTH = 'M'
+    YEAR = 'Y'

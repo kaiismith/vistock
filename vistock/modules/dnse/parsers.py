@@ -1,14 +1,17 @@
-from vistock.core.interfaces.ivistockparser import IVistockDNSEStockIndexParser
-from vistock.core.constants import DEFAULT_DNSE_DOMAIN
-from vistock.core.utils import VistockValidator
+from vistock.core.interfaces.ivistockparser import IVistockTradingIndexParser
+from vistock.core.models import (
+    StandardTradingIndexSearch,
+    StandardTradingIndexSearchResults
+)
+from vistock.core.utils import (
+    VistockValidator,
+    VistockConverter
+)
 from datetime import datetime, timezone, timedelta
-from typing import Dict, Any
+from typing import List, Dict, Any
 
-class VistockDNSEStockIndexParser(IVistockDNSEStockIndexParser):
-    def __init__(self):
-        self._domain = DEFAULT_DNSE_DOMAIN
-
-    def parse_payload(
+class VistockDNSETradingIndexParser(IVistockTradingIndexParser):
+    def to_payload(
         self,
         code: str,
         current_datetime: str = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
@@ -29,7 +32,8 @@ class VistockDNSEStockIndexParser(IVistockDNSEStockIndexParser):
         current_datetime = dt.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
         return {
-            'query': f'''
+            "operationName": "GetKrxTicksBySymbols",
+            "query": f"""
                 query GetKrxTicksBySymbols {{
                     GetKrxTicksBySymbols(
                         symbols: "{code}", 
@@ -47,6 +51,23 @@ class VistockDNSEStockIndexParser(IVistockDNSEStockIndexParser):
                         }}
                     }}
                 }}
-            '''
+            """,
+            "variables": {}
         }
-        
+    
+    def to_standard(
+        self,
+        data: List[Dict[str, Any]]
+    ) -> StandardTradingIndexSearchResults:
+        return StandardTradingIndexSearchResults(
+            results=[
+                StandardTradingIndexSearch(
+                    code=item.get('symbol', ''),
+                    match_price=item.get('matchPrice', 0.0),
+                    match_volume= item.get('matchQtty', 0),
+                    sending_time=VistockConverter.from_utc_to_local(item.get('sendingTime', '')),
+                    side=item.get('side', 0)
+                ) for item in data
+            ],
+            total_results=len(data)
+        )

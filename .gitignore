@@ -204,3 +204,5 @@ DEV_GUIDELINE.md
 main.py
 
 *.json
+
+temp.txt

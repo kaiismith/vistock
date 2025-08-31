@@ -1,24 +1,31 @@
-from pydantic import BaseModel
 from typing import List, Optional
+from pydantic import BaseModel
 
-class StandardVnDirectStockIndexSearch(BaseModel):
+class StandardStockIndexSearch(BaseModel):
     code: str
     date: str
-    time: str
     tfloor: str
-    type: str
     mopen: float
     mhigh: float
     mlow: float
     mclose: float
-    maverage: float
     nmvolume: int
 
     def __repr__(self):
         return super().__repr__()
+    
+class StandardStockIndexSearchResults(BaseModel):
+    results: List[StandardStockIndexSearch]
+    total_results: int
 
-class AdvancedVnDirectStockIndexSearch(BaseModel):
-    standard: StandardVnDirectStockIndexSearch
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
+    
+class AdvancedStockIndexSearch(BaseModel):
+    code: str
+    date: str
+    tfloor: str
     basic: float
     ceiling: float
     floor: float
@@ -27,35 +34,32 @@ class AdvancedVnDirectStockIndexSearch(BaseModel):
     low: float
     close: float
     average: float
-    nmvalue: float
+    mopen: float
+    mhigh: float
+    mlow: float
+    mclose: float
+    maverage: float
+    nmvolume: int
+    nmvalue: int
     ptvolume: float
     ptvalue: float
     change: float
     mchange: float
     pctchange: float
 
-    def __repr__(self):
-        return super().__repr__()
-
-class StandardVnDirectStockIndexSearchResults(BaseModel):
-    results: List[StandardVnDirectStockIndexSearch]
+class AdvancedStockIndexSearchResults(BaseModel):
+    results: List[AdvancedStockIndexSearch]
     total_results: int
 
     def __str__(self):
         results_repr = ', '.join(repr(r) for r in self.results)
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
-
-class AdvancedVnDirectStockIndexSearchResults(BaseModel):
-    results: List[AdvancedVnDirectStockIndexSearch]
-    total_results: int
-
-    def __str__(self):
-        results_repr = ', '.join(repr(r) for r in self.results)
-        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
-
-class StandardVnDirectFundamentalIndexSearchResults(BaseModel):
+    
+class StandardFundamentalIndexSearchResults(BaseModel):
+    code: str
+    date: str
     marketcap: float
-    nm_volume_avg_cr_10d: float
+    nmvolume_avg_cr_10d: float
     price_highest_cr_52w: float
     price_lowest_cr_52w: float
     outstanding_shares: float
@@ -63,17 +67,18 @@ class StandardVnDirectFundamentalIndexSearchResults(BaseModel):
     beta: float
     price_to_earnings: float
     price_to_book: float
-    roae_tr_avg_5q: float
-    roaa_tr_avg_5q: float
+    roae_tr_avg5q: float
+    roaa_tr_avg5q: float
     dividend_yield: float
     eps_tr: float
     bvps_cr: float
 
-    def __str__(self):
-        fields = ', '.join(f"{k}={v!r}" for k, v in self.model_dump().items())
-        return f'{self.__class__.__name__}({fields})'
+    def __repr__(self):
+        return super().__repr__()
     
-class StandardVnDirectFinancialModelSearch(BaseModel):
+class StandardFinancialModelsSearch(BaseModel):
+    code: str
+    date: str
     model_type: int
     model_type_name: str
     model_vn_desc: str
@@ -90,17 +95,29 @@ class StandardVnDirectFinancialModelSearch(BaseModel):
     def __repr__(self):
         return super().__repr__()
 
-class StandardVnDirectFinancialModelSearchResults(BaseModel):
-    results: List[StandardVnDirectFinancialModelSearch]
+class StandardFinancialModelsSearchResults(BaseModel):
+    results: List[StandardFinancialModelsSearch]
     total_results: int
 
     def __str__(self):
         results_repr = ', '.join(repr(r) for r in self.results)
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
     
-class StandardVnDirectFinancialStatementsIndex(BaseModel):
+class StandardFinancialStatementsIndex(BaseModel):
     code: str
-    model: StandardVnDirectFinancialModelSearch
+    date: str
+    model_type: int
+    model_type_name: str
+    model_vn_desc: str
+    model_en_desc: str
+    company_form: str
+    note: str
+    item_code: int
+    item_vn_name: str
+    item_en_name: str
+    display_order: int
+    display_level: int
+    form_type: str 
     report_type: str
     numeric_value: int
     fiscal_date: str
@@ -109,16 +126,37 @@ class StandardVnDirectFinancialStatementsIndex(BaseModel):
 
     def __repr__(self):
         return super().__repr__()
+    
+class StandardFinancialStatementsIndexSearchResults(BaseModel):
+    results: List[StandardFinancialStatementsIndex]
+    total_results: int
 
-class StandardVnDirectFinancialStatementsIndexSearchResults(BaseModel):
-    results: List[StandardVnDirectFinancialStatementsIndex]
+    def __str__(self):
+        results_repr = ', '.join(repr(r) for r in self.results)
+        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'   
+    
+class StandardMarketPricesSearch(BaseModel):
+    code: str
+    date: str
+    tfloor: str
+    open: float
+    high: float
+    low: float
+    close: float
+    nmvolume: float
+
+    def __repr__(self):
+        return super().__repr__()
+    
+class StandardMarketPricesSearchResults(BaseModel):
+    results: List[StandardMarketPricesSearch]
     total_results: int
 
     def __str__(self):
         results_repr = ', '.join(repr(r) for r in self.results)
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
-    
-class StandardVnDirectMarketPricesSearch(BaseModel):
+
+class AdvancedMarketPricesSearch(BaseModel):
     code: str
     date: str
     time: str
@@ -147,15 +185,15 @@ class StandardVnDirectMarketPricesSearch(BaseModel):
     def __repr__(self):
         return super().__repr__()
 
-class StandardVnDirectMarketPricesSearchResults(BaseModel):
-    results: List[StandardVnDirectMarketPricesSearch]
+class AdvancedMarketPricesSearchResults(BaseModel):
+    results: List[AdvancedMarketPricesSearch]
     total_results: int
 
     def __str__(self):
         results_repr = ', '.join(repr(r) for r in self.results)
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
         
-class StandardVnDirectChangePricesSearch(BaseModel):
+class StandardChangePricesSearch(BaseModel):
     code: str
     name: str
     type: str
@@ -169,55 +207,35 @@ class StandardVnDirectChangePricesSearch(BaseModel):
     def __repr__(self):
         return super().__repr__()
     
-class StandardVnDirectChangePricesSearchResults(BaseModel):
-    results: List[StandardVnDirectChangePricesSearch]
+class StandardChangePricesSearchResults(BaseModel):
+    results: List[StandardChangePricesSearch]
     total_results: int
 
     def __str__(self):
         results_repr = ', '.join(repr(r) for r in self.results)
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
     
-class Standard24HMoneyStockSection(BaseModel):
+class StandardStockListingSearch(BaseModel):
     code: str
     company_name: str
     tfloor: str
     company_type: Optional[str] = ''
     icb_name_vi: Optional[str] = ''
-    icb_name_en: Optional[str] = ''
     listed_share_vol: Optional[int] = 0
     fiingroup_icb_code: int
 
     def __repr__(self):
         return super().__repr__()
-
-class Standard24HMoneyStockSectionSearchResults(BaseModel):
-    results: List[Standard24HMoneyStockSection]
+    
+class StandardStockListingSearchResults(BaseModel):
+    results: List[StandardStockListingSearch]
     total_results: int
 
     def __str__(self):
         results_repr = ', '.join(repr(r) for r in self.results)
         return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
-    
-class StandardVietstockStockIndexSearch(BaseModel):
-    mopen: float
-    mhigh: float
-    mlow: float
-    mclose: float
-    mvolume: int
-    timestamp: str
 
-    def __repr__(self):
-        return super().__repr__()
-
-class StandardVietstockStockIndexSearchResults(BaseModel):
-    results: List[StandardVietstockStockIndexSearch]
-    total_results: int
-
-    def __str__(self):
-        results_repr = ', '.join(repr(r) for r in self.results)
-        return f'{self.__class__.__name__}(results=[{results_repr}], total_results={self.total_results})'
-    
-class StandardDNSEStockIndexSearch(BaseModel):
+class StandardTradingIndexSearch(BaseModel):
     code: str
     match_price: float
     match_volume: int
@@ -226,9 +244,9 @@ class StandardDNSEStockIndexSearch(BaseModel):
 
     def __repr__(self):
         return super().__repr__()
-
-class StandardDNSEStockIndexSearchResults(BaseModel):
-    results: List[StandardDNSEStockIndexSearch]
+    
+class StandardTradingIndexSearchResults(BaseModel):
+    results: List[StandardTradingIndexSearch]
     total_results: int
 
     def __str__(self):

@@ -66,3 +66,14 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the Apache 2.0 - see the `LICENSE` file for details.
 
+def search(
+        self,
+        code: str,
+        start_date: str = '2000-01-01',
+        end_date: str = datetime.now().strftime('%Y-%m-%d'),
+        period: Literal['1D'] = '1D',
+        resolution: Literal['day'] = 'day',
+        advanced: bool = True,
+        ascending: bool = True
+    ):
+        ...
