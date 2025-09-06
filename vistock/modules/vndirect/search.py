@@ -99,6 +99,12 @@ class VistockVndirectStockIndexSearch(IVistockStockIndexSearch, AsyncIVistockSto
         advanced: bool = True,
         ascending: bool = True
     ) -> Union[StandardStockIndexSearchResults, AdvancedStockIndexSearchResults]:
+        if start_date and (
+            (isinstance(period, VistockPeriodCode) and period != VistockPeriodCode.ALL)
+            or (isinstance(period, str) and period.upper() != "ALL")
+        ):
+            raise ValueError("You cannot specify both start_date and period. Use only one.")
+        
         if not start_date:
             start_date = VistockGenerator.generate_start_date(period=period)
 
@@ -146,6 +152,12 @@ class VistockVndirectStockIndexSearch(IVistockStockIndexSearch, AsyncIVistockSto
         advanced: bool = True,
         ascending: bool = True
     ) -> Union[StandardStockIndexSearchResults, AdvancedStockIndexSearchResults]:
+        if start_date and (
+            (isinstance(period, VistockPeriodCode) and period != VistockPeriodCode.ALL)
+            or (isinstance(period, str) and period.upper() != "ALL")
+        ):
+            raise ValueError("You cannot specify both start_date and period. Use only one.")
+
         if not start_date:
             start_date = VistockGenerator.generate_start_date(period=period)
 
@@ -487,6 +499,12 @@ class VistockVndirectMarketPricesSearch(IVistockMarketPricesSearch, AsyncIVistoc
         advanced: bool = True,
         ascending: bool = True
     ) -> Union[StandardMarketPricesSearchResults, AdvancedMarketPricesSearchResults]:
+        if start_date and (
+            (isinstance(period, VistockPeriodCode) and period != VistockPeriodCode.ALL)
+            or (isinstance(period, str) and period.upper() != "ALL")
+        ):
+            raise ValueError("You cannot specify both start_date and period. Use only one.")
+
         if not start_date:
             start_date = VistockGenerator.generate_start_date(period=period)
 
@@ -530,12 +548,16 @@ class VistockVndirectMarketPricesSearch(IVistockMarketPricesSearch, AsyncIVistoc
                         raise ValueError(
                             f'No data found for the given parameters: code="{code}", start_date="{start_date}", end_date="{end_date}". Please verify the input parameters and try again.'
                         )
+                    
+                    data = self._parser.to_resolution(data=data, resolution=resolution)
+
+            data = self._parser.to_resolution(data=data, resolution=resolution)
 
             results.append(data)
 
         prices = [item for result in results for item in result]
 
-        if advanced:
+        if advanced and resolution == VistockResolutionCode.DAY:
             return self._parser.to_advanced(prices=prices)
 
         return self._parser.to_standard(prices=prices)
@@ -550,6 +572,12 @@ class VistockVndirectMarketPricesSearch(IVistockMarketPricesSearch, AsyncIVistoc
         advanced: bool = True,
         ascending: bool = True
     ) -> Union[StandardMarketPricesSearchResults, AdvancedMarketPricesSearchResults]:
+        if start_date and (
+            (isinstance(period, VistockPeriodCode) and period != VistockPeriodCode.ALL)
+            or (isinstance(period, str) and period.upper() != "ALL")
+        ):
+            raise ValueError("You cannot specify both start_date and period. Use only one.")
+
         if not start_date:
             start_date = VistockGenerator.generate_start_date(period=period)
 

@@ -72,6 +72,12 @@ class VistockVietstockStockIndexSearch(IVistockStockIndexSearch, AsyncIVistockSt
         advanced: bool = False,
         ascending: bool = True
     ) -> Union[StandardStockIndexSearchResults, AdvancedStockIndexSearchResults]:
+        if start_date and (
+            (isinstance(period, VistockPeriodCode) and period != VistockPeriodCode.ALL)
+            or (isinstance(period, str) and period.upper() != "ALL")
+        ):
+            raise ValueError("You cannot specify both start_date and period. Use only one.")
+
         if not start_date:
             start_date = VistockGenerator.generate_start_date(period=period)
 
@@ -159,6 +165,12 @@ class VistockVietstockStockIndexSearch(IVistockStockIndexSearch, AsyncIVistockSt
         advanced: bool = False,
         ascending: bool = True    
     ) -> Union[StandardStockIndexSearchResults, AdvancedStockIndexSearchResults]:
+        if start_date and (
+            (isinstance(period, VistockPeriodCode) and period != VistockPeriodCode.ALL)
+            or (isinstance(period, str) and period.upper() != "ALL")
+        ):
+            raise ValueError("You cannot specify both start_date and period. Use only one.")
+
         if not start_date:
             start_date = VistockGenerator.generate_start_date(period=period)
 
