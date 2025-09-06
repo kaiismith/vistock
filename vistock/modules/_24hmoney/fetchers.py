@@ -67,8 +67,7 @@ class Vistock24HMoneyAPIFetcher(IVistockAPIFetcher, AsyncIVistockAPIFetcher):
     async def async_fetch(self, url: str) -> Dict[str, Any]:
         if not VistockValidator.validate_url_with_domain(url=url, domain=self._domain):
             raise ValueError(
-                f'Invalid URL: "{url}". The provided URL must belong to the expected domain "{self._domain}" '
-                "to ensure source integrity and proper routing within the system."
+                f'Invalid URL: "{url}". The URL must belong to the expected domain "{self._domain}" to ensure proper validation and access control.'
             )
         
         async with httpx.AsyncClient(timeout=self._timeout) as client:
