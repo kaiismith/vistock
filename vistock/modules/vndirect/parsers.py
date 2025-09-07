@@ -111,7 +111,7 @@ class VistockVndirectStockIndexParser(IVistockStockIndexParser):
             return data
         
         grouped: DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
-        buckets : DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
+        buckets: DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
 
         for item in data:
             bucket_key = VistockConverter.from_date_to_dateresolution(item.get('date', ''), resolution)
@@ -513,7 +513,7 @@ class VistockVndirectMarketPricesParser(IVistockMarketPricesParser):
             return data
         
         grouped: DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
-        buckets : DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
+        buckets: DefaultDict[str, List[Dict[str, Any]]] = defaultdict(list)
 
         for item in data:
             bucket_key = VistockConverter.from_date_to_dateresolution(item.get('date', ''), resolution)
