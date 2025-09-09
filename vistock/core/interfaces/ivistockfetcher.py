@@ -1,14 +1,14 @@
-from typing import Dict, Any
+from typing import Dict, Any, Protocol
 
-class IVistockAPIFetcher:
+class IVistockAPIFetcher(Protocol):
     def fetch(self, url: str) -> Dict[str, Any]:
         ...
 
-class AsyncIVistockAPIFetcher:
+class AsyncIVistockAPIFetcher(Protocol):
     async def async_fetch(self, url: str) -> Dict[str, Any]:
         ...
 
-class IVistockAPIWithPayloadFetcher:
+class IVistockAPIWithPayloadFetcher(Protocol):
     def fetch(
         self,
         url: str,
@@ -16,7 +16,7 @@ class IVistockAPIWithPayloadFetcher:
     ) -> Dict[str, Any]:
         ...
 
-class AsyncIVistockAPIWithPayloadFetcher:
+class AsyncIVistockAPIWithPayloadFetcher(Protocol):
     async def async_fetch(
         self,
         url: str,
